@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 #include "lib.h"
-#include "tcp.h"
+#include "net.h"
 
 #define SEND_PROBABILITY 0.2
 
@@ -55,6 +55,9 @@ ParsingResult parse_args(int argc, char **argv, NodeData *result)
     result->network_node_ids[0] = "A";
     result->network_node_ids[1] = "B";
     result->network_node_ids[2] = "C";
+
+    result->log_ip = net_get_ip("224.0.0.1");
+    result->log_port = 4444;
 
     return OK;
 }
@@ -157,6 +160,7 @@ void handle_token(NodeData *data) {
 }
 
 
+
 NodeState next_state(NodeData *data, NodeState current_state)
 {
     if (current_state == START) {
@@ -168,6 +172,7 @@ NodeState next_state(NodeData *data, NodeState current_state)
     } else if (current_state == HAS_TOKEN) {
         if (data->token != NULL) {
             handle_token(data);
+            send_log_info("Received token\n", data->log_ip, data->log_port);
             send_token(data);
             return NO_TOKEN;
         } else {

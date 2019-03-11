@@ -83,6 +83,8 @@ typedef struct
     Token *token;
     char **network_node_ids;
     int network_node_ids_n;
+    uint log_ip;
+    uint log_port;
 } NodeData;
 
 void error(const char * message);

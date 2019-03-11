@@ -3,5 +3,5 @@ project(message_ring C)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(message_ring tcp.c tcp.h lib.c lib.h serialization.c serialization.h node.c)
+add_executable(message_ring net.c net.h lib.c lib.h serialization.c serialization.h node.c)
 target_link_libraries(message_ring pthread)

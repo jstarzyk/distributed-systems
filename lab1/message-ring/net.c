@@ -8,7 +8,7 @@
 #include <sys/socket.h>
 #include <pthread.h>
 
-#include "tcp.h"
+#include "net.h"
 #include "serialization.h"
 
 
@@ -174,4 +174,34 @@ uint net_get_ip(char *ip)
     // TODO: Handle errors
     in_addr_t addr = inet_addr(ip);
     return ntohl(addr);
+}
+
+void send_log_info(char *message, uint addr, uint port)
+{
+    printf("Sending log info: %s\n", message);
+
+    int fd;
+    fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (fd == -1) {
+        error("socket");
+    }
+
+    struct sockaddr_in dest;
+    memset(&dest, 0, sizeof(dest));
+    dest.sin_family = AF_INET;
+    dest.sin_addr.s_addr = htonl(addr);
+    dest.sin_port = htons((uint16_t) port);
+
+    size_t len = strlen(message);
+    size_t buffer_size = sizeof(uint32_t) + len;
+    char *buffer = malloc(buffer_size);
+    *(uint32_t *) buffer = htonl((uint32_t) len);
+    memcpy(buffer + sizeof(uint32_t), message, len);
+
+    ssize_t res = sendto(fd, buffer, buffer_size, 0, (struct sockaddr *) &dest, sizeof(dest));
+    if (res < 0) {
+        error("send_log_info");
+    }
+
+    close(fd);
 }
