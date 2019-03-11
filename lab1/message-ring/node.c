@@ -1,10 +1,11 @@
 #include <unistd.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "lib.h"
 #include "tcp.h"
 
-#define SEND_PROBABILITY 0.5
+#define SEND_PROBABILITY 0.2
 
 
 typedef enum
@@ -32,23 +33,41 @@ ParsingResult parse_args(int argc, char **argv, NodeData *result)
     uint neighbor_port = (uint) atoi(argv[++arg_no]);
     char *has_token = argv[++arg_no];
 
+    result->self = malloc(sizeof(Node));
     strncpy(result->self->id, self_id, ID_SIZE);
     result->self->ip = net_get_ip("127.0.0.1");
     result->self->port = self_port;
+
+    result->neighbor = malloc(sizeof(Node));
     result->neighbor->ip = net_get_ip(neighbor_ip);
     result->neighbor->port = neighbor_port;
+
     if (strcmp(has_token, "y") == 0) {
         result->token = create_empty_token();
     } else {
         result->token = NULL;
     }
 
+    int n = 3;
+    result->network_node_ids_n = n;
+    result->network_node_ids = malloc(n * sizeof(char*));
+
+    result->network_node_ids[0] = "A";
+    result->network_node_ids[1] = "B";
+    result->network_node_ids[2] = "C";
+
     return OK;
 }
 
 void handle_message_to_self(NodeData *data, Message *message)
 {
-    // TODO: Remove Message_NetworkState
+    printf("---MSG START---\n");
+    printf("from: %s\n", message->header.from);
+    printf("to: %s\n", message->header.to);
+    if (message->header.type == PING) {
+        printf("data:\n%s\n", ((Message_Ping *) message->content)->data);
+    }
+    printf("---MSG END---\n");
     free(message->content);
 }
 
@@ -93,6 +112,11 @@ void handle_token(NodeData *data) {
     Message **to_other_ptrs = malloc(token->n * sizeof(Message *));
 
     Message *generated_message = generate_random_message(data);
+    if (generated_message == NULL) {
+        printf("Will send no message\n");
+    } else {
+        printf("Will send new message to %s\n", generated_message->header.to);
+    }
 
     for (int i = 0; i < token->n; i++) {
         Message *message = &token->messages[i];
@@ -112,17 +136,16 @@ void handle_token(NodeData *data) {
         }
 
         Message *messages = malloc(num_messages_to_send * sizeof(Message));
-        size_t offset = 0;
 
+        int n = 0;
         for (int i = 0; i < token->n; i++) {
             if (to_other_ptrs[i] != NULL) {
-                memcpy(messages + offset, to_other_ptrs[i], sizeof(Message));
-                offset += sizeof(Message);
+                memcpy(&messages[n++], to_other_ptrs[i], sizeof(Message));
             }
         }
 
         if (generated_message != NULL) {
-            memcpy(messages + offset, generated_message, sizeof(Message));
+            memcpy(&messages[n], generated_message, sizeof(Message));
         }
 
         token->n = num_messages_to_send;
@@ -168,6 +191,17 @@ void net_received_token(NodeData *data, Token *token)
 }
 
 
+const char *state_name(NodeState state)
+{
+    switch (state) {
+        case START: return "START";
+        case HAS_TOKEN: return "HAS_TOKEN";
+        case NO_TOKEN: return "NO_TOKEN";
+        case EXIT: return "EXIT";
+        default: return "<UNKNOWN>";
+    }
+}
+
 int main(int argc, char **argv)
 {
     NodeData data;
@@ -180,7 +214,9 @@ int main(int argc, char **argv)
     register_node(&data, &net_received_token);
 
     while (state != EXIT) {
+        printf("main: current state: %s\n", state_name(state));
         state = next_state(&data, state);
+        printf("main: next state: %s\n", state_name(state));
         sleep(1);
     }
 }

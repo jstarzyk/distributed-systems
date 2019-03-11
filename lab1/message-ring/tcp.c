@@ -12,13 +12,9 @@
 #include "serialization.h"
 
 
-//void error(const char * message) {
-//    perror(message);
-//    exit(1);
-//}
-
 void send_token(NodeData *data)
 {
+
     Token *token = data->token;
     Node *neighbor = data->neighbor;
     SerializedToken st;
@@ -27,6 +23,8 @@ void send_token(NodeData *data)
     if (res != OK) {
         error("serialize_token");
     }
+
+    printf("Sending token with %d messages, %ld bytes\n", token->n, st.size);
 
     int fd;
     fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -62,8 +60,9 @@ void send_token(NodeData *data)
 
 
 void handle_connection(NodeData *data, token_handler handler, int conn) {
-    uint32_t size = 0;
-    ssize_t res_size = read(conn, &size, sizeof(uint32_t));
+    printf("hc: enter\n");
+    uint32_t net_size = 0;
+    ssize_t res_size = read(conn, &net_size, sizeof(uint32_t));
     if (res_size == -1) {
         error("read size error");
     }
@@ -71,11 +70,16 @@ void handle_connection(NodeData *data, token_handler handler, int conn) {
         error("read size mismatch");
     }
 
-    size = ntohl(size);
+    uint32_t size = ntohl(net_size);
+    printf("hc: read size: %d\n", size);
 
     char *buffer = malloc(size);
-    size_t bytes_to_read = size;
-    size_t offset = 0;
+//    printf("1\n");
+    *((uint32_t *)buffer) = net_size;
+//    printf("2\n");
+
+    size_t offset = sizeof(uint32_t);
+    size_t bytes_to_read = size - offset;
 
     while (bytes_to_read > 0) {
         ssize_t res_data = read(conn, buffer + offset, bytes_to_read);
@@ -85,6 +89,7 @@ void handle_connection(NodeData *data, token_handler handler, int conn) {
         bytes_to_read -= res_data;
         offset += res_data;
     }
+//    printf("3\n");
 
     SerializedToken st;
     st.size = size;
@@ -94,10 +99,13 @@ void handle_connection(NodeData *data, token_handler handler, int conn) {
     if (OK != deserialize_token(&st, &token)) {
         error("deserialize_token");
     }
+//    printf("4\n");
 
     free(buffer);
 
+    printf("hc: calling handler...\n");
     handler(data, &token);
+    printf("hc: exit\n");
 }
 
 typedef struct
@@ -108,18 +116,21 @@ typedef struct
 } ThreadArgs;
 
 
-void *lll(void *arg)
+void *network_loop(void *arg)
 {
     ThreadArgs *_arg = (ThreadArgs *) arg;
     for (;;) {
         struct sockaddr_in peer;
         socklen_t peer_addr_size;
+        printf("nl: accepting, fd = %d\n", _arg->fd);
         int conn = accept(_arg->fd, (struct sockaddr *)&peer, &peer_addr_size);
         if (conn == -1) {
             error("accept");
         }
         handle_connection(_arg->data, _arg->handler, conn);
     }
+
+    // TODO: free(_arg);
 }
 
 void register_node(NodeData *data, token_handler handler)
@@ -131,7 +142,7 @@ void register_node(NodeData *data, token_handler handler)
         error("socket");
     }
 
-    //TODO: setsockopt(fd, )
+    printf("socket created with fd: %d\n", fd);
 
     struct sockaddr_in addr;
     memset(&addr, 0, sizeof(addr));
@@ -148,11 +159,11 @@ void register_node(NodeData *data, token_handler handler)
     }
 
     pthread_t pid;
-    ThreadArgs arg;
-    arg.handler = handler;
-    arg.data = data;
-    arg.fd = fd;
-    int res = pthread_create(&pid, NULL, lll, &arg);
+    ThreadArgs *arg = malloc(sizeof(ThreadArgs));
+    arg->handler = handler;
+    arg->data = data;
+    arg->fd = fd;
+    int res = pthread_create(&pid, NULL, network_loop, arg);
     if (res == -1) {
         error("pthread_create");
     }

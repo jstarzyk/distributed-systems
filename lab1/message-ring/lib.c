@@ -5,6 +5,6 @@
 void error(const char *message)
 {
     fprintf(stderr, "error: %s\n", message);
-//    perror(message);
+    perror(message);
     exit(1);
 }

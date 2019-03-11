@@ -11,5 +11,4 @@ typedef enum
 SerializationResult serialize_token(Token *token, SerializedToken *serialized_token);
 SerializationResult deserialize_token(SerializedToken *serialized_token, Token *token);
 
-
 #endif //MESSAGE_RING_SERIALIZATION_H

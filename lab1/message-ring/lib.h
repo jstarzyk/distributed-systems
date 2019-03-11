@@ -3,8 +3,8 @@
 
 #include <stdlib.h>
 
-#define ID_SIZE 128
-#define DATA_SIZE 4096
+#define ID_SIZE 16
+#define DATA_SIZE 1024
 
 typedef enum
 {

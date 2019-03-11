@@ -124,19 +124,8 @@ SerializationResult _deserialize_message(char *ptr, Message *message)
     } else if (message->header.type == JOIN_REPLY) {
         message->content = malloc(sizeof(Message_JoinReply));
         _deserialize_node(content_ptr, &(((Message_JoinReply *) message->content)->node));
-    } else if (message->header.type == NETWORK_STATE) {
-        Message_NetworkState *content = (Message_NetworkState *) message->content;
-
-        int n = ntohl(*(uint32_t *) content_ptr);
-        content_ptr += sizeof(uint32_t);
-        content->n = n;
-        content->nodes = malloc(n * sizeof(Node));
-
-        for (int i = 0; i < content->n; i++) {
-            _deserialize_node(content_ptr, &content->nodes[i]);
-            content_ptr += SERIALIZED_NODE_SIZE;
-        }
     } else if (message->header.type == PING) {
+        message->content = malloc(sizeof(Message_Ping));
         memcpy(&(((Message_Ping *) message->content)->data), content_ptr, DATA_SIZE);
     } else {
         return ERROR;
@@ -147,13 +136,14 @@ SerializationResult _deserialize_message(char *ptr, Message *message)
 
 SerializationResult serialize_token(Token *token, SerializedToken *serialized_token)
 {
-    size_t size =  sizeof(size_t) + _calculate_serialized_token_size(token);
+    size_t size = sizeof(uint32_t) + _calculate_serialized_token_size(token);
     char *data = malloc(size);
 
     size_t offset = 0;
     *(uint32_t *) (data + offset) = htonl((uint32_t) size);
     offset += sizeof(uint32_t);
     *(uint32_t *) (data + offset) = htonl((uint32_t) token->n);
+    offset += sizeof(uint32_t);
 
     for (int i = 0; i < token->n; i++) {
         Message *message = &token->messages[i];
@@ -176,12 +166,15 @@ SerializationResult deserialize_token(SerializedToken *serialized_token, Token *
 
     size_t offset = 0;
     int size = ntohl(*(uint32_t *)(data + offset));
+    printf("deserialize: size: %d\n", size);
+
     if (size != serialized_token->size) {
-        // TODO: Error
+        error("deserialize: size");
     }
     offset += sizeof(uint32_t);
 
     int n = ntohl(*(uint32_t *)(data + offset));
+    printf("deserialize: n: %d\n", n);
     offset += sizeof(uint32_t);
 
     token->n = n;
@@ -193,9 +186,6 @@ SerializationResult deserialize_token(SerializedToken *serialized_token, Token *
             return res;
         }
         offset += _calculate_serialized_message_size(&token->messages[i]);
-        if (offset >= size) {
-            return ERROR;
-        }
     }
 
     return OK;
