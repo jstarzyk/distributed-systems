@@ -147,12 +147,13 @@ SerializationResult _deserialize_message(char *ptr, Message *message)
 
 SerializationResult serialize_token(Token *token, SerializedToken *serialized_token)
 {
-    size_t size = _calculate_serialized_token_size(token);
+    size_t size =  sizeof(size_t) + _calculate_serialized_token_size(token);
     char *data = malloc(size);
 
-    uint32_t n = htonl((uint32_t) token->n);
-    *(uint32_t *) data = n;
-    size_t offset = sizeof(uint32_t);
+    size_t offset = 0;
+    *(uint32_t *) (data + offset) = htonl((uint32_t) size);
+    offset += sizeof(uint32_t);
+    *(uint32_t *) (data + offset) = htonl((uint32_t) token->n);
 
     for (int i = 0; i < token->n; i++) {
         Message *message = &token->messages[i];
@@ -163,22 +164,28 @@ SerializationResult serialize_token(Token *token, SerializedToken *serialized_to
         offset += _calculate_serialized_message_size(message);
     }
 
-    serialized_token->data = data;
     serialized_token->size = size;
+    serialized_token->data = data;
 
     return OK;
 }
 
 SerializationResult deserialize_token(SerializedToken *serialized_token, Token *token)
 {
-    size_t size = serialized_token->size;
     char *data = serialized_token->data;
 
-    int n = ntohl(*(uint32_t *) data);
+    size_t offset = 0;
+    int size = ntohl(*(uint32_t *)(data + offset));
+    if (size != serialized_token->size) {
+        // TODO: Error
+    }
+    offset += sizeof(uint32_t);
+
+    int n = ntohl(*(uint32_t *)(data + offset));
+    offset += sizeof(uint32_t);
+
     token->n = n;
     token->messages = malloc(n * sizeof(Message));
-
-    size_t offset = sizeof(uint32_t);
 
     for (int i = 0; i < n; i++) {
         SerializationResult res = _deserialize_message(data + offset, &token->messages[i]);

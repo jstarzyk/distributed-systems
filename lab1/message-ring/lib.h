@@ -8,6 +8,14 @@
 
 typedef enum
 {
+    START,
+    HAS_TOKEN,
+    NO_TOKEN,
+    EXIT
+} NodeState;
+
+typedef enum
+{
     JOIN_REQUEST,
     JOIN_REPLY,
     NETWORK_STATE,
@@ -66,6 +74,18 @@ typedef struct
 {
     char data[DATA_SIZE];
 } Message_Ping;
+
+
+typedef struct
+{
+    Node *self;
+    Node *neighbor;
+    Token *token;
+    char **network_node_ids;
+    int network_node_ids_n;
+} NodeData;
+
+void error(const char * message);
 
 
 #endif //MESSAGE_RING_TOKEN_H

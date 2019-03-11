@@ -1,11 +1,12 @@
 #ifndef MESSAGE_RING_TCP_H
 #define MESSAGE_RING_TCP_H
 
-#include "ring.h"
+#include "lib.h"
 
-typedef void (*token_handler(Token*));
+typedef void (*token_handler)(NodeData *, Token*);
 
-void send_token(Token *token, Node *neighbor);
-void register_node(Node *node, token_handler handler);
+void send_token(NodeData *data);
+void register_node(NodeData *data, token_handler handler);
+uint net_get_ip(char *ip);
 
 #endif //MESSAGE_RING_TCP_H

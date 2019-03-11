@@ -1,6 +1,0 @@
-#ifndef MESSAGE_RING_NODE_H
-#define MESSAGE_RING_NODE_H
-
-
-
-#endif //MESSAGE_RING_NODE_H

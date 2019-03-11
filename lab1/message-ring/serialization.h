@@ -1,7 +1,7 @@
 #ifndef MESSAGE_RING_SERIALIZATION_H
 #define MESSAGE_RING_SERIALIZATION_H
 
-#include "ring.h"
+#include "lib.h"
 
 typedef enum
 {
