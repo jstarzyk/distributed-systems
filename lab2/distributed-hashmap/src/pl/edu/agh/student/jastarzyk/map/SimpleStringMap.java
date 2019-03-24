@@ -1,4 +1,4 @@
-package pl.edu.agh.student.jastarzyk;
+package pl.edu.agh.student.jastarzyk.map;
 
 public interface SimpleStringMap {
 
@@ -6,7 +6,8 @@ public interface SimpleStringMap {
 
     Integer get(String key);
 
-    void put(String key, Integer value);
+    Integer put(String key, Integer value);
 
     Integer remove(String key);
+
 }
