@@ -11,7 +11,7 @@ public class Main {
     public static void main(String[] args) throws Exception {
         System.setProperty("java.net.preferIPv4Stack", "true");
 
-        DistributedMap state = new DistributedMap("HashMap");
+        DistributedMap state = new DistributedMap("jstarzyk");
         InputStreamReader in = new InputStreamReader(System.in);
         BufferedReader reader = new BufferedReader(in);
 
