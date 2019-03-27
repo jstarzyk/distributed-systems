@@ -2,4 +2,4 @@
 **/cmake-build-debug
 **/.directory
 **/out
-lab1/message-ring/ring_token.log
+**/*.log
