@@ -4,16 +4,14 @@ public class Result extends Examination {
 
     private String result;
 
-    public Result(Type type, String patientName, String result) {
-        super(type, patientName);
+    public Result(Request request, String result) {
+        super(request.type, request.patientName);
         this.result = result;
     }
 
-    public Result(Request request) {
-        super(request.type, request.patientName);
-//        this.patientName = request.patientName;
-//        this.type = request.type;
-        this.result = null;
+    @Override
+    public String toString() {
+        return type.toString() + " " + patientName + " done";
     }
 
     public String getResult() {
@@ -24,8 +22,4 @@ public class Result extends Examination {
         this.result = result;
     }
 
-    @Override
-    public String toString() {
-        return type.toString() + " " + patientName + " done";
-    }
 }

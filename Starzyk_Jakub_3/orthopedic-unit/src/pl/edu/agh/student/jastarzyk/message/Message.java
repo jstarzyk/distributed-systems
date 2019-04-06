@@ -12,7 +12,7 @@ public abstract class Message implements Serializable {
     String date;
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-M-dd hh:mm:ss");
 
-    Message() {
+    public Message() {
         this.date = dateFormat.format(new Date());
     }
 
@@ -39,7 +39,7 @@ public abstract class Message implements Serializable {
 
     public void send(Channel channel, String routingKey) throws IOException {
         byte[] bytes = this.serialize();
-        channel.basicPublish(Exchange.EXCHANGE_NAME, routingKey, null, bytes);
+        channel.basicPublish(Exchange.NAME, routingKey, null, bytes);
         sent(this.toString());
     }
 
@@ -53,4 +53,5 @@ public abstract class Message implements Serializable {
         }
         return message;
     }
+
 }

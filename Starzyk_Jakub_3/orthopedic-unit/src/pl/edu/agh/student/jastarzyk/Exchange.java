@@ -1,16 +1,19 @@
 package pl.edu.agh.student.jastarzyk;
 
-import com.rabbitmq.client.*;
+import com.rabbitmq.client.BuiltinExchangeType;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
 import pl.edu.agh.student.jastarzyk.message.Examination;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 public class Exchange {
 
-    public static final String EXCHANGE_NAME = "orthopedic-unit";
+    public static final String NAME = "orthopedic-unit";
     public static final String INFO = "info";
     public static final String REQUEST = "req";
     public static final String RESULT = "res";
@@ -19,7 +22,18 @@ public class Exchange {
         return c + s + c;
     }
 
-//    public static void queueCreated(String name, List<String> routingPatterns) {
+    private static void createQueues(Channel channel) throws IOException {
+        String queueName;
+
+        for (Examination.Type type : Examination.Type.values()) {
+            queueName = type.toString();
+            String routingPattern = makeRoutingKey(REQUEST, queueName);
+            channel.queueDeclare(queueName, false, false, true, null);
+            channel.queueBind(queueName, NAME, routingPattern);
+            queueCreated(queueName, routingPattern);
+        }
+    }
+
     public static void queueCreated(String name, String... routingPatterns) {
         String result = String.join(" ",
                 "Queue",
@@ -41,28 +55,12 @@ public class Exchange {
         return factory.newConnection();
     }
 
-    private static void declareQueues(Channel channel) throws IOException {
-        String queueName;
-
-        for (Examination.Type type : Examination.Type.values()) {
-            queueName = type.toString();
-            String routingPattern = makeRoutingKey(REQUEST, queueName);
-            channel.queueDeclare(queueName, false, false, true, null);
-            channel.queueBind(queueName, EXCHANGE_NAME, routingPattern);
-            queueCreated(queueName, routingPattern);
-        }
-    }
-
-
-
     public static void main(String[] args) {
         try {
             Connection connection = getConnection();
             Channel channel = connection.createChannel();
-
-            channel.exchangeDeclare(EXCHANGE_NAME, BuiltinExchangeType.TOPIC);
-            declareQueues(channel);
-
+            channel.exchangeDeclare(NAME, BuiltinExchangeType.TOPIC);
+            createQueues(channel);
 //            channel.close();
 //            connection.close();
         } catch (Exception e) {
@@ -70,19 +68,4 @@ public class Exchange {
         }
     }
 
-    //    public static void consumeString(Channel channel, String queueName) throws IOException {
-//        Consumer infoConsumer = new DefaultConsumer(channel) {
-//            @Override
-//            public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
-//                try {
-//                    Examination e = (Examination) Examination.deserialize(body);
-//                    received(e.toString());
-//                } catch (ClassNotFoundException ex) {
-//                    ex.printStackTrace();
-//                }
-//            }
-//        };
-//
-//        channel.basicConsume(queueName, true, infoConsumer);
-//    }
 }

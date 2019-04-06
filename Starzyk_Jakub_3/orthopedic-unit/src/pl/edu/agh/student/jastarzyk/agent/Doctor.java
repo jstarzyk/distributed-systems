@@ -30,9 +30,7 @@ public class Doctor extends Agent {
         doctor.bindQueue(infoQueue, Exchange.INFO);
 
         doctor.listen(resultQueue, new ResultConsumer(doctor.getChannel()));
-//        doctor.channel.basicConsume(resultQueue, true, new ResultConsumer(doctor.channel));
         doctor.listen(infoQueue, new InfoConsumer(doctor.getChannel()));
-//        doctor.channel.basicConsume(infoQueue, true, new InfoConsumer(doctor.channel));
 
         System.out.println("Waiting for results...");
 
@@ -41,65 +39,16 @@ public class Doctor extends Agent {
             if (!cmd.equals("")) {
                 continue;
             }
+
             System.out.print("Enter message type (knee, hip, elbow): ");
             String examinationType = br.readLine().strip().toUpperCase();
             System.out.print("Enter patient name: ");
             String patientName = br.readLine().strip();
 
             Request request = new Request(Examination.Type.valueOf(examinationType), patientName, resultPattern);
-//            request.setRoutingKey(resultPattern);
-
-//            doctor.send(request, Exchange.makeRoutingKey(Exchange.REQUEST, examinationType));
             String routingKey = Exchange.makeRoutingKey(Exchange.REQUEST, examinationType);
-//            byte[] bytes = Exchange.serialize(request);
-//            doctor.channel.basicPublish(Exchange.EXCHANGE_NAME, routingKey, null, bytes);
-//            Exchange.sent(request.toString());
             request.send(doctor.getChannel(), routingKey);
         }
-
     }
-
-//    public static void main2(String[] args) throws Exception {
-//        System.out.println("DOCTOR");
-//        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-//
-//        Connection connection = Exchange.getConnection();
-//        Channel channel = connection.createChannel();
-//
-//        String localQueue = channel.queueDeclare().getQueue();
-////        String resultPattern = Exchange.RESULT + "." + localQueue.split("\\.")[1];
-//        String localPattern = Exchange.makeRoutingKey(Exchange.RESULT, localQueue.split("\\.")[1]);
-//        channel.queueBind(localQueue, Exchange.EXCHANGE_NAME, localPattern);
-//        channel.queueBind(localQueue, Exchange.EXCHANGE_NAME, Exchange.INFO);
-//        Exchange.queueCreated(localQueue, localPattern, Exchange.INFO);
-//
-//        Consumer loggingConsumer = new LoggingConsumer(channel);
-//        channel.basicConsume(localQueue, true, loggingConsumer);
-//
-//        System.out.println("Waiting for results...");
-//
-//        while (true) {
-//            String cmd = br.readLine();
-//            if (!cmd.equals("")) {
-//                continue;
-//            }
-//            System.out.print("Enter message type (knee, hip, elbow): ");
-//            String examinationType = br.readLine().strip().toUpperCase();
-//            System.out.print("Enter patient name: ");
-//            String patientName = br.readLine().strip();
-//
-//            Request request = new Request(Type.valueOf(examinationType), patientName);
-//            request.setRoutingKey(localPattern);
-//
-////            String routingKey = Exchange.REQUEST + "." + examinationType;
-//            String routingKey = Exchange.makeRoutingKey(Exchange.REQUEST, examinationType);
-//            byte[] bytes = Examination.serialize(request);
-//
-//            channel.basicPublish(Exchange.EXCHANGE_NAME, routingKey, null, bytes);
-////            Exchange.sent(bytes);
-//            Exchange.sent(request.toString());
-//        }
-//
-//    }
 
 }

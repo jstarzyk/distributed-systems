@@ -12,17 +12,9 @@ import java.util.concurrent.TimeoutException;
 
 public abstract class Agent {
 
-//    public Connection getConnection() {
-//        return connection;
-//    }
-
-    public Channel getChannel() {
-        return channel;
-    }
-//
     private Connection connection;
     private Channel channel;
-    List<String> localQueues;
+    private List<String> localQueues;
 
     Agent() throws IOException, TimeoutException {
         this.connection = Exchange.getConnection();
@@ -38,7 +30,7 @@ public abstract class Agent {
 
     void bindQueue(String queue, String... patterns) throws IOException {
         for (String pattern : patterns) {
-            channel.queueBind(queue, Exchange.EXCHANGE_NAME, pattern);
+            channel.queueBind(queue, Exchange.NAME, pattern);
         }
         Exchange.queueCreated(queue, patterns);
     }
@@ -47,10 +39,8 @@ public abstract class Agent {
         channel.basicConsume(queue, true, consumer);
     }
 
-    //    public static Object receive(byte[] bytes) throws IOException, ClassNotFoundException {
-//        Object object = Exchange.deserialize(bytes);
-//        Exchange.received(object.toString());
-//        return object;
-//    }
+    public Channel getChannel() {
+        return channel;
+    }
 
 }

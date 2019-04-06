@@ -18,22 +18,10 @@ public class RequestConsumer extends DefaultConsumer {
 
     @Override
     public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] bytes) throws IOException {
-//        try {
-//            Request request = (Request) Exchange.deserialize(bytes);
-//            Exchange.received(request.toString());
-//            String routingKey = request.getRoutingKey();
-//            Result result = new Result(request);
-////            byte[] bytes = Exchange.serialize(result);
-////            this.getChannel().basicPublish(Exchange.EXCHANGE_NAME, routingKey, null, bytes);
-////            Exchange.sent(result.toString());
-//            result.send(this.getChannel(), routingKey);
-//        } catch (ClassNotFoundException e) {
-//            e.printStackTrace();
-//        }
-
         Request request = (Request) Message.receive(bytes);
         String routingKey = request.getRoutingKey();
-        Result result = new Result(request);
+        Result result = new Result(request, null);
         result.send(this.getChannel(), routingKey);
     }
+
 }
