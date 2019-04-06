@@ -8,9 +8,9 @@ import pl.edu.agh.student.jastarzyk.message.Message;
 
 import java.io.IOException;
 
-public class LoggingConsumer extends DefaultConsumer {
+public class ExaminationConsumer extends DefaultConsumer {
 
-    public LoggingConsumer(Channel channel) {
+    public ExaminationConsumer(Channel channel) {
         super(channel);
     }
 

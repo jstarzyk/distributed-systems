@@ -1,6 +1,6 @@
 package pl.edu.agh.student.jastarzyk.agent;
 
-import pl.edu.agh.student.jastarzyk.consumer.LoggingConsumer;
+import pl.edu.agh.student.jastarzyk.consumer.ExaminationConsumer;
 import pl.edu.agh.student.jastarzyk.Exchange;
 import pl.edu.agh.student.jastarzyk.message.Info;
 
@@ -22,7 +22,7 @@ public class Administrator extends Agent {
         Administrator administrator = new Administrator();
         String queue = administrator.createQueue();
         administrator.bindQueue(queue, Exchange.makeKey("*", "*"));
-        administrator.listen(queue, new LoggingConsumer(administrator.getChannel()));
+        administrator.listen(queue, new ExaminationConsumer(administrator.getChannel()));
 
         String routingKey = Exchange.makeKey(Exchange.INFO);
 
