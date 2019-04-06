@@ -24,10 +24,10 @@ public class Doctor extends Agent {
         String infoQueue = doctor.createQueue();
         String resultQueue = doctor.createQueue();
 
-        String resultPattern = Exchange.makeRoutingKey(Exchange.RESULT, resultQueue.split("\\.")[1]);
+        String bindingKey = Exchange.makeKey(Exchange.RESULT, resultQueue.split("\\.")[1]);
 
-        doctor.bindQueue(resultQueue, resultPattern);
-        doctor.bindQueue(infoQueue, Exchange.INFO);
+        doctor.bindQueue(resultQueue, bindingKey);
+        doctor.bindQueue(infoQueue, Exchange.makeKey(Exchange.INFO));
 
         doctor.listen(resultQueue, new ResultConsumer(doctor.getChannel()));
         doctor.listen(infoQueue, new InfoConsumer(doctor.getChannel()));
@@ -45,9 +45,8 @@ public class Doctor extends Agent {
             System.out.print("Enter patient name: ");
             String patientName = br.readLine().strip();
 
-            Request request = new Request(Examination.Type.valueOf(examinationType), patientName, resultPattern);
-            String routingKey = Exchange.makeRoutingKey(Exchange.REQUEST, examinationType);
-            request.send(doctor.getChannel(), routingKey);
+            Request request = new Request(Examination.Type.valueOf(examinationType), patientName, bindingKey);
+            request.send(doctor.getChannel(), Exchange.makeKey(Exchange.REQUEST, examinationType));
         }
     }
 

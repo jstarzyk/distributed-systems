@@ -27,7 +27,7 @@ public class Exchange {
 
         for (Examination.Type type : Examination.Type.values()) {
             queueName = type.toString();
-            String routingPattern = makeRoutingKey(REQUEST, queueName);
+            String routingPattern = makeKey(REQUEST, queueName);
             channel.queueDeclare(queueName, false, false, true, null);
             channel.queueBind(queueName, NAME, routingPattern);
             queueCreated(queueName, routingPattern);
@@ -45,7 +45,7 @@ public class Exchange {
         System.out.println(result);
     }
 
-    public static String makeRoutingKey(String... tokens) {
+    public static String makeKey(String... tokens) {
         return String.join(".", tokens);
     }
 

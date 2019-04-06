@@ -21,8 +21,10 @@ public class Administrator extends Agent {
 
         Administrator administrator = new Administrator();
         String queue = administrator.createQueue();
-        administrator.bindQueue(queue, Exchange.makeRoutingKey("*", "*"));
+        administrator.bindQueue(queue, Exchange.makeKey("*", "*"));
         administrator.listen(queue, new LoggingConsumer(administrator.getChannel()));
+
+        String routingKey = Exchange.makeKey(Exchange.INFO);
 
         System.out.println("Waiting for messages...");
 
@@ -36,7 +38,7 @@ public class Administrator extends Agent {
             String line = br.readLine();
 
             Info info = new Info(line);
-            info.send(administrator.getChannel(), Exchange.INFO);
+            info.send(administrator.getChannel(), routingKey);
         }
     }
 

@@ -36,11 +36,8 @@ public class Technician extends Agent {
         }
 
         Technician technician = new Technician(types);
-
         String queue = technician.createQueue();
-
-        technician.bindQueue(queue, Exchange.INFO);
-
+        technician.bindQueue(queue, Exchange.makeKey(Exchange.INFO));
         technician.listen(queue, new InfoConsumer(technician.getChannel()));
 
         Consumer requestConsumer = new RequestConsumer(technician.getChannel());
