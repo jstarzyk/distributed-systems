@@ -1,20 +1,20 @@
-package pl.edu.agh.student.jastarzyk.examination;
+package pl.edu.agh.student.jastarzyk.message;
 
 public class Request extends Examination {
 
     public String getRoutingKey() {
         return routingKey;
     }
-
-    public void setRoutingKey(String routingKey) {
-        this.routingKey = routingKey;
-    }
+//
+//    public void setRoutingKey(String routingKey) {
+//        this.routingKey = routingKey;
+//    }
 
     private String routingKey;
 
-    public Request(Type type, String patientName) {
+    public Request(Type type, String patientName, String routingKey) {
         super(type, patientName);
-        this.routingKey = null;
+        this.routingKey = routingKey;
     }
 
     @Override

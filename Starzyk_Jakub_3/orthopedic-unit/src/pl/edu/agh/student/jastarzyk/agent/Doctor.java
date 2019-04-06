@@ -2,9 +2,9 @@ package pl.edu.agh.student.jastarzyk.agent;
 
 import pl.edu.agh.student.jastarzyk.consumer.InfoConsumer;
 import pl.edu.agh.student.jastarzyk.consumer.ResultConsumer;
-import pl.edu.agh.student.jastarzyk.examination.Exchange;
-import pl.edu.agh.student.jastarzyk.examination.Request;
-import pl.edu.agh.student.jastarzyk.examination.Type;
+import pl.edu.agh.student.jastarzyk.Exchange;
+import pl.edu.agh.student.jastarzyk.message.Examination;
+import pl.edu.agh.student.jastarzyk.message.Request;
 
 import java.io.*;
 import java.util.concurrent.TimeoutException;
@@ -29,10 +29,10 @@ public class Doctor extends Agent {
         doctor.bindQueue(resultQueue, resultPattern);
         doctor.bindQueue(infoQueue, Exchange.INFO);
 
-//        doctor.listen(resultQueue, new ResultConsumer(doctor.channel));
-        doctor.channel.basicConsume(resultQueue, true, new ResultConsumer(doctor.channel));
-//        doctor.listen(infoQueue, new InfoConsumer(doctor.channel));
-        doctor.channel.basicConsume(infoQueue, true, new InfoConsumer(doctor.channel));
+        doctor.listen(resultQueue, new ResultConsumer(doctor.getChannel()));
+//        doctor.channel.basicConsume(resultQueue, true, new ResultConsumer(doctor.channel));
+        doctor.listen(infoQueue, new InfoConsumer(doctor.getChannel()));
+//        doctor.channel.basicConsume(infoQueue, true, new InfoConsumer(doctor.channel));
 
         System.out.println("Waiting for results...");
 
@@ -41,19 +41,20 @@ public class Doctor extends Agent {
             if (!cmd.equals("")) {
                 continue;
             }
-            System.out.print("Enter examination type (knee, hip, elbow): ");
+            System.out.print("Enter message type (knee, hip, elbow): ");
             String examinationType = br.readLine().strip().toUpperCase();
             System.out.print("Enter patient name: ");
             String patientName = br.readLine().strip();
 
-            Request request = new Request(Type.valueOf(examinationType), patientName);
-            request.setRoutingKey(resultPattern);
+            Request request = new Request(Examination.Type.valueOf(examinationType), patientName, resultPattern);
+//            request.setRoutingKey(resultPattern);
 
 //            doctor.send(request, Exchange.makeRoutingKey(Exchange.REQUEST, examinationType));
             String routingKey = Exchange.makeRoutingKey(Exchange.REQUEST, examinationType);
-            byte[] bytes = Exchange.serialize(request);
-            doctor.channel.basicPublish(Exchange.EXCHANGE_NAME, routingKey, null, bytes);
-            Exchange.sent(request.toString());
+//            byte[] bytes = Exchange.serialize(request);
+//            doctor.channel.basicPublish(Exchange.EXCHANGE_NAME, routingKey, null, bytes);
+//            Exchange.sent(request.toString());
+            request.send(doctor.getChannel(), routingKey);
         }
 
     }
@@ -82,7 +83,7 @@ public class Doctor extends Agent {
 //            if (!cmd.equals("")) {
 //                continue;
 //            }
-//            System.out.print("Enter examination type (knee, hip, elbow): ");
+//            System.out.print("Enter message type (knee, hip, elbow): ");
 //            String examinationType = br.readLine().strip().toUpperCase();
 //            System.out.print("Enter patient name: ");
 //            String patientName = br.readLine().strip();

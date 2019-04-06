@@ -2,7 +2,8 @@ package pl.edu.agh.student.jastarzyk.agent;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
-import pl.edu.agh.student.jastarzyk.examination.Exchange;
+import com.rabbitmq.client.Consumer;
+import pl.edu.agh.student.jastarzyk.Exchange;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,13 +15,13 @@ public abstract class Agent {
 //    public Connection getConnection() {
 //        return connection;
 //    }
+
+    public Channel getChannel() {
+        return channel;
+    }
 //
-//    public Channel getChannel() {
-//        return channel;
-//    }
-//
-    Connection connection;
-    Channel channel;
+    private Connection connection;
+    private Channel channel;
     List<String> localQueues;
 
     Agent() throws IOException, TimeoutException {
@@ -42,17 +43,11 @@ public abstract class Agent {
         Exchange.queueCreated(queue, patterns);
     }
 
-//    void listen(String queue, Consumer consumer) throws IOException {
-//        channel.basicConsume(queue, true, consumer);
-//    }
+    void listen(String queue, Consumer consumer) throws IOException {
+        channel.basicConsume(queue, true, consumer);
+    }
 
-//    void send(Object object, String routingKey) throws IOException {
-//        byte[] bytes = Exchange.serialize(object);
-//        channel.basicPublish(Exchange.EXCHANGE_NAME, routingKey, null, bytes);
-//        Exchange.sent(object.toString());
-//    }
-
-//    public static Object receive(byte[] bytes) throws IOException, ClassNotFoundException {
+    //    public static Object receive(byte[] bytes) throws IOException, ClassNotFoundException {
 //        Object object = Exchange.deserialize(bytes);
 //        Exchange.received(object.toString());
 //        return object;

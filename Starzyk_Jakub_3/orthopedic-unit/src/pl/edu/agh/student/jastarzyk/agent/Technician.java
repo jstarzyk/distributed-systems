@@ -2,9 +2,10 @@ package pl.edu.agh.student.jastarzyk.agent;
 
 //import com.rabbitmq.client.*;
 import com.rabbitmq.client.Consumer;
+import pl.edu.agh.student.jastarzyk.Exchange;
 import pl.edu.agh.student.jastarzyk.consumer.InfoConsumer;
 import pl.edu.agh.student.jastarzyk.consumer.RequestConsumer;
-import pl.edu.agh.student.jastarzyk.examination.*;
+import pl.edu.agh.student.jastarzyk.message.*;
 
 import java.io.*;
 import java.util.concurrent.TimeoutException;
@@ -12,12 +13,12 @@ import java.util.concurrent.TimeoutException;
 public class Technician extends Agent {
 
     private static final int NUMBER_OF_TYPES = 2;
-    private Type[] types;
+    private Examination.Type[] types;
 
-    private Technician(Type[] types) throws IOException, TimeoutException {
+    private Technician(Examination.Type[] types) throws IOException, TimeoutException {
         super();
         this.types = types;
-        channel.basicQos(1);
+        this.getChannel().basicQos(1);
     }
 
 //    @Override
@@ -37,14 +38,14 @@ public class Technician extends Agent {
         System.out.println("TECHNICIAN");
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        int numberOfTypes = Math.min(NUMBER_OF_TYPES, Type.values().length);
-        Type[] types = new Type[numberOfTypes];
+        int numberOfTypes = Math.min(NUMBER_OF_TYPES, Examination.Type.values().length);
+        Examination.Type[] types = new Examination.Type[numberOfTypes];
 
         String line;
         for (int i = 0; i < numberOfTypes; i++) {
-            System.out.print("Enter examination type #" + (i + 1) + ": ");
+            System.out.print("Enter message type #" + (i + 1) + ": ");
             line = br.readLine();
-            Type type = Type.valueOf(line.toUpperCase());
+            Examination.Type type = Examination.Type.valueOf(line.toUpperCase());
             types[i] = type;
         }
 
@@ -60,12 +61,12 @@ public class Technician extends Agent {
         Technician technician = new Technician(types);
         String queue = technician.createQueue();
         technician.bindQueue(queue, Exchange.INFO);
-//        technician.listen(queue, new InfoConsumer(technician.channel));
-        technician.channel.basicConsume(queue, true, new InfoConsumer(technician.channel));
-        Consumer requestConsumer = new RequestConsumer(technician.channel);
-        for (Type type : technician.types) {
-//            technician.listen(type.toString(), requestConsumer);
-            technician.channel.basicConsume(type.toString(), true, requestConsumer);
+        technician.listen(queue, new InfoConsumer(technician.getChannel()));
+//        technician.channel.basicConsume(queue, true, new InfoConsumer(technician.channel));
+        Consumer requestConsumer = new RequestConsumer(technician.getChannel());
+        for (Examination.Type type : technician.types) {
+            technician.listen(type.toString(), requestConsumer);
+//            technician.channel.basicConsume(type.toString(), true, requestConsumer);
         }
 //
 //        Consumer loggingConsumer = new LoggingConsumer(channel);

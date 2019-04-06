@@ -1,6 +1,7 @@
-package pl.edu.agh.student.jastarzyk.examination;
+package pl.edu.agh.student.jastarzyk;
 
 import com.rabbitmq.client.*;
+import pl.edu.agh.student.jastarzyk.message.Examination;
 
 import java.io.*;
 import java.util.Arrays;
@@ -13,14 +14,6 @@ public class Exchange {
     public static final String INFO = "info";
     public static final String REQUEST = "req";
     public static final String RESULT = "res";
-
-    public static void received(String message) {
-        System.out.println("Received: " + message);
-    }
-
-    public static void sent(String message) {
-        System.out.println("Sent: " + message);
-    }
 
     private static String wrap(String s, String c) {
         return c + s + c;
@@ -51,7 +44,7 @@ public class Exchange {
     private static void declareQueues(Channel channel) throws IOException {
         String queueName;
 
-        for (Type type : Type.values()) {
+        for (Examination.Type type : Examination.Type.values()) {
             queueName = type.toString();
             String routingPattern = makeRoutingKey(REQUEST, queueName);
             channel.queueDeclare(queueName, false, false, true, null);
@@ -77,20 +70,7 @@ public class Exchange {
         }
     }
 
-    public static byte[] serialize(Object object) throws IOException {
-        var b = new ByteArrayOutputStream();
-        var o = new ObjectOutputStream(b);
-        o.writeObject(object);
-        return b.toByteArray();
-    }
-
-    public static Object deserialize(byte[] bytes) throws IOException, ClassNotFoundException {
-        var b = new ByteArrayInputStream(bytes);
-        var o = new ObjectInputStream(b);
-        return o.readObject();
-    }
-
-//    public static void consumeString(Channel channel, String queueName) throws IOException {
+    //    public static void consumeString(Channel channel, String queueName) throws IOException {
 //        Consumer infoConsumer = new DefaultConsumer(channel) {
 //            @Override
 //            public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {

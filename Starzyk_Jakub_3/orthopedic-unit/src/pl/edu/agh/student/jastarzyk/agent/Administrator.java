@@ -1,11 +1,8 @@
 package pl.edu.agh.student.jastarzyk.agent;
 
-import com.rabbitmq.client.Consumer;
 import pl.edu.agh.student.jastarzyk.consumer.LoggingConsumer;
-import pl.edu.agh.student.jastarzyk.examination.Exchange;
-import pl.edu.agh.student.jastarzyk.examination.Info;
-import pl.edu.agh.student.jastarzyk.examination.Request;
-import pl.edu.agh.student.jastarzyk.examination.Type;
+import pl.edu.agh.student.jastarzyk.Exchange;
+import pl.edu.agh.student.jastarzyk.message.Info;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -41,8 +38,8 @@ public class Administrator extends Agent {
 
         String queue = administrator.createQueue();
         administrator.bindQueue(queue, Exchange.makeRoutingKey("*", "*"));
-//        administrator.listen(queue, new LoggingConsumer(administrator.channel));
-        administrator.channel.basicConsume(queue, true, new LoggingConsumer(administrator.channel));
+        administrator.listen(queue, new LoggingConsumer(administrator.getChannel()));
+//        administrator.channel.basicConsume(queue, true, new LoggingConsumer(administrator.channel));
 //        administrator.channel.basicConsume(administrator.localQueue, new LoggingConsumer(administrator.channel));
 //        Consumer loggingConsumer = new LoggingConsumer(administrator.channel);
 //        channel.basicConsume(localQueue, true, loggingConsumer);
@@ -59,9 +56,10 @@ public class Administrator extends Agent {
             String line = br.readLine();
 
             Info info = new Info(line);
-            byte[] bytes = Exchange.serialize(info);
-            administrator.channel.basicPublish(Exchange.EXCHANGE_NAME, Exchange.INFO, null, bytes);
-            Exchange.sent(info.toString());
+            info.send(administrator.getChannel(), Exchange.INFO);
+//            byte[] bytes = Exchange.serialize(info);
+//            administrator.channel.basicPublish(Exchange.EXCHANGE_NAME, Exchange.INFO, null, bytes);
+//            Exchange.sent(info.toString());
         }
     }
 

@@ -1,8 +1,10 @@
 package pl.edu.agh.student.jastarzyk.consumer;
 
-import com.rabbitmq.client.*;
-import pl.edu.agh.student.jastarzyk.examination.Examination;
-import pl.edu.agh.student.jastarzyk.examination.Exchange;
+import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.DefaultConsumer;
+import com.rabbitmq.client.Envelope;
+import pl.edu.agh.student.jastarzyk.message.Message;
 
 import java.io.IOException;
 
@@ -13,11 +15,12 @@ public class LoggingConsumer extends DefaultConsumer {
 
     @Override
     public void handleDelivery(String s, Envelope envelope, AMQP.BasicProperties basicProperties, byte[] bytes) throws IOException {
-        try {
-            Examination message = (Examination) Exchange.deserialize(bytes);
-            Exchange.received(message.toString());
-        } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
-        }
+//        try {
+//            Examination message = (Examination) Exchange.deserialize(bytes);
+//            Exchange.received(message.toString());
+//        } catch (ClassNotFoundException ex) {
+//            ex.printStackTrace();
+//        }
+        Message.receive(bytes);
     }
 }
