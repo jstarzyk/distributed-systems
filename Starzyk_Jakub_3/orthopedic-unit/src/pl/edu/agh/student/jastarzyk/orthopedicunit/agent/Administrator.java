@@ -1,8 +1,8 @@
-package pl.edu.agh.student.jastarzyk.agent;
+package pl.edu.agh.student.jastarzyk.orthopedicunit.agent;
 
-import pl.edu.agh.student.jastarzyk.consumer.ExaminationConsumer;
-import pl.edu.agh.student.jastarzyk.Exchange;
-import pl.edu.agh.student.jastarzyk.message.Info;
+import pl.edu.agh.student.jastarzyk.orthopedicunit.consumer.ExaminationConsumer;
+import pl.edu.agh.student.jastarzyk.orthopedicunit.Exchange;
+import pl.edu.agh.student.jastarzyk.orthopedicunit.message.Info;
 
 import java.io.BufferedReader;
 import java.io.IOException;

@@ -1,10 +1,10 @@
-package pl.edu.agh.student.jastarzyk.agent;
+package pl.edu.agh.student.jastarzyk.orthopedicunit.agent;
 
-import pl.edu.agh.student.jastarzyk.consumer.InfoConsumer;
-import pl.edu.agh.student.jastarzyk.consumer.ResultConsumer;
-import pl.edu.agh.student.jastarzyk.Exchange;
-import pl.edu.agh.student.jastarzyk.message.Examination;
-import pl.edu.agh.student.jastarzyk.message.Request;
+import pl.edu.agh.student.jastarzyk.orthopedicunit.consumer.InfoConsumer;
+import pl.edu.agh.student.jastarzyk.orthopedicunit.consumer.ResultConsumer;
+import pl.edu.agh.student.jastarzyk.orthopedicunit.Exchange;
+import pl.edu.agh.student.jastarzyk.orthopedicunit.message.Examination;
+import pl.edu.agh.student.jastarzyk.orthopedicunit.message.Request;
 
 import java.io.*;
 import java.util.concurrent.TimeoutException;

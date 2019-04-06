@@ -1,4 +1,4 @@
-package pl.edu.agh.student.jastarzyk.message;
+package pl.edu.agh.student.jastarzyk.orthopedicunit.message;
 
 public class Examination extends Message {
 

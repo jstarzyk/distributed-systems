@@ -1,7 +1,7 @@
-package pl.edu.agh.student.jastarzyk.message;
+package pl.edu.agh.student.jastarzyk.orthopedicunit.message;
 
 import com.rabbitmq.client.Channel;
-import pl.edu.agh.student.jastarzyk.Exchange;
+import pl.edu.agh.student.jastarzyk.orthopedicunit.Exchange;
 
 import java.io.*;
 import java.text.SimpleDateFormat;

@@ -1,10 +1,10 @@
-package pl.edu.agh.student.jastarzyk;
+package pl.edu.agh.student.jastarzyk.orthopedicunit;
 
 import com.rabbitmq.client.BuiltinExchangeType;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import pl.edu.agh.student.jastarzyk.message.Examination;
+import pl.edu.agh.student.jastarzyk.orthopedicunit.message.Examination;
 
 import java.io.IOException;
 import java.util.Arrays;

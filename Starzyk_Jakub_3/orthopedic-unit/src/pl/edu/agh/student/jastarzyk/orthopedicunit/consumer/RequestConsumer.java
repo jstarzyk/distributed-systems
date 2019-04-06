@@ -1,12 +1,12 @@
-package pl.edu.agh.student.jastarzyk.consumer;
+package pl.edu.agh.student.jastarzyk.orthopedicunit.consumer;
 
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
-import pl.edu.agh.student.jastarzyk.message.Message;
-import pl.edu.agh.student.jastarzyk.message.Request;
-import pl.edu.agh.student.jastarzyk.message.Result;
+import pl.edu.agh.student.jastarzyk.orthopedicunit.message.Message;
+import pl.edu.agh.student.jastarzyk.orthopedicunit.message.Request;
+import pl.edu.agh.student.jastarzyk.orthopedicunit.message.Result;
 
 import java.io.IOException;
 

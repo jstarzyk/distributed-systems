@@ -1,10 +1,11 @@
-package pl.edu.agh.student.jastarzyk.agent;
+package pl.edu.agh.student.jastarzyk.orthopedicunit.agent;
 
 import com.rabbitmq.client.Consumer;
-import pl.edu.agh.student.jastarzyk.Exchange;
-import pl.edu.agh.student.jastarzyk.consumer.InfoConsumer;
-import pl.edu.agh.student.jastarzyk.consumer.RequestConsumer;
+import pl.edu.agh.student.jastarzyk.orthopedicunit.Exchange;
+import pl.edu.agh.student.jastarzyk.orthopedicunit.consumer.InfoConsumer;
+import pl.edu.agh.student.jastarzyk.orthopedicunit.consumer.RequestConsumer;
 import pl.edu.agh.student.jastarzyk.message.*;
+import pl.edu.agh.student.jastarzyk.orthopedicunit.message.Examination;
 
 import java.io.*;
 import java.util.concurrent.TimeoutException;

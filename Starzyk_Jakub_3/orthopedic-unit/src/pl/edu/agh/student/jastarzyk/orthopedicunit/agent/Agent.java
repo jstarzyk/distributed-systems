@@ -1,9 +1,9 @@
-package pl.edu.agh.student.jastarzyk.agent;
+package pl.edu.agh.student.jastarzyk.orthopedicunit.agent;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.Consumer;
-import pl.edu.agh.student.jastarzyk.Exchange;
+import pl.edu.agh.student.jastarzyk.orthopedicunit.Exchange;
 
 import java.io.IOException;
 import java.util.ArrayList;
