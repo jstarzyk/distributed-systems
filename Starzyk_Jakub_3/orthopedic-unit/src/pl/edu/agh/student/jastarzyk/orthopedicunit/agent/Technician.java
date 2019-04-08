@@ -4,7 +4,6 @@ import com.rabbitmq.client.Consumer;
 import pl.edu.agh.student.jastarzyk.orthopedicunit.Exchange;
 import pl.edu.agh.student.jastarzyk.orthopedicunit.consumer.InfoConsumer;
 import pl.edu.agh.student.jastarzyk.orthopedicunit.consumer.RequestConsumer;
-import pl.edu.agh.student.jastarzyk.message.*;
 import pl.edu.agh.student.jastarzyk.orthopedicunit.message.Examination;
 
 import java.io.*;
@@ -30,7 +29,7 @@ public class Technician extends Agent {
 
         String line;
         for (int i = 0; i < numberOfTypes; i++) {
-            System.out.print("Enter message type #" + (i + 1) + ": ");
+            System.out.print("Enter examination type #" + (i + 1) + ": ");
             line = br.readLine();
             Examination.Type type = Examination.Type.valueOf(line.toUpperCase());
             types[i] = type;
