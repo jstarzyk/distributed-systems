@@ -1,7 +1,13 @@
 package client;
 
-import account.*;
-import bank.*;
+import account.Account;
+import auth.AuthToken;
+import auth.Unauthenticated;
+import auth.Unauthorized;
+import bank.AccountService;
+import bank.PremiumService;
+import bank.StandardService;
+import credit.CreditSummary;
 import errors.ArgumentError;
 import money.Money;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -10,8 +16,6 @@ import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
-import premium.CreditSummary;
-import premium.PremiumService;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -90,9 +94,9 @@ public class ThriftClient {
 //    private static void perform() throws TException, IOException {
 //        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         var accountClient = new AccountService.Client(protocol);
-//        var standardClient = new StandardService.Client(protocol);
+        var standardClient = new StandardService.Client(protocol);
         var premiumClient = new PremiumService.Client(protocol);
-        var bankClient = new BankService.Client(protocol);
+//        var bankClient = new BankService.Client(protocol);
 //        BankService.Client bankClient = null;
         String line = null;
         boolean repeatOperation = false;
@@ -130,7 +134,7 @@ public class ThriftClient {
                 } else if (isBalance(line)) {
 //                try {
                     AuthToken authToken = authToken();
-                    Money balance = bankClient.balance(authToken);
+                    Money balance = standardClient.balance(authToken);
                     received(balance);
 //                } catch (Unauthenticated unauthenticated) {
 //                    printErrorMessage(unauthenticated.message);

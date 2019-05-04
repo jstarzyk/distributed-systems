@@ -1,32 +1,40 @@
 include "money.thrift"
+include "errors.thrift"
+include "account.thrift"
+include "auth.thrift"
+include "credit.thrift"
 
 namespace java bank
 
-struct AuthToken {
-    1: string id,
-    2: string passwordHash
-}
-
-//exception InvalidDueDate {
-//    1: string message
+//struct CreditSummary {
+//    1: money.Money domesticTotal,
+//    2: optional money.Money foreignTotal,
 //}
 
-exception Unauthenticated {
-    1: string message
+service AccountService {
+    account.Account account(
+        1: string firstName,
+        2: string lastName,
+        3: string id,
+        4: string limit
+    ) throws (
+        1: errors.ArgumentError argumentError
+    )
 }
 
-exception Unauthorized {
-    1: string message
+service StandardService {
+    money.Money balance(1: auth.AuthToken authToken) throws (1: auth.Unauthenticated unauthenticated)
 }
 
-service BankService {
-//    string auth(
-//        1: string id,
-//        2: string passwordHash
-//    ) throws (
-//        1: InvalidCredentials eic
-//    ),
-
-//    money.Money balance() throws (1: Unauthorized unauthorized)
-    money.Money balance(1: AuthToken authToken) throws (1: Unauthenticated unauthenticated)
+service PremiumService extends StandardService {
+    credit.CreditSummary credit(
+        1: string currency,
+        2: string amount,
+        3: string dueDate,
+        4: auth.AuthToken token
+    ) throws (
+        1: errors.ArgumentError argumentError,
+        2: auth.Unauthenticated unauthenticated,
+        3: auth.Unauthorized unauthorized,
+    )
 }

@@ -1,6 +1,9 @@
 package server;
 
-import account.AccountService;
+import bank.AccountService;
+import bank.PremiumService;
+import bank.StandardService;
+import org.apache.thrift.TMultiplexedProcessor;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocolFactory;
 import org.apache.thrift.server.TServer;
@@ -47,6 +50,26 @@ public class ThriftServer {
             TServer server = new TSimpleServer(new TServer.Args(serverTransport).protocolFactory(protocolFactory).processor(processor1));
 
             System.out.println("Starting the simple server...");
+            server.serve();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void multiplexed() {
+        try {
+            var processor = new TMultiplexedProcessor();
+
+            processor.registerDefault(new AccountService.Processor<>(new AccountHandler()));
+            processor.registerDefault(new PremiumService.Processor<>(new PremiumHandler()));
+            processor.registerDefault(new StandardService.Processor<>(new StandardHandler()));
+
+            TServerTransport serverTransport = new TServerSocket(9090);
+            TProtocolFactory protocolFactory = new TBinaryProtocol.Factory();
+            TServer server = new TSimpleServer(new TServer.Args(serverTransport).protocolFactory(protocolFactory).processor(processor));
+
+            System.out.println("Starting the multiplexed server...");
+
             server.serve();
         } catch (Exception e) {
             e.printStackTrace();
