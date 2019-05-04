@@ -27,10 +27,10 @@ struct Money {
 //    3: FractionAmount fractionAmount,
 }
 
-exception InvalidAmount {
-    1: string message
-}
-
-exception InvalidCurrency {
-    1: string message
-}
+//exception InvalidAmount {
+//    1: string message
+//}
+//
+//exception InvalidCurrency {
+//    1: string message
+//}

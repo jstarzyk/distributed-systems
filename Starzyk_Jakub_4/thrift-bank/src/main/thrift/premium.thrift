@@ -1,5 +1,6 @@
 include "bank.thrift"
 include "money.thrift"
+include "errors.thrift"
 
 namespace java premium
 
@@ -13,10 +14,16 @@ service PremiumService extends bank.BankService {
         1: string currency,
         2: string amount,
         3: string dueDate,
+        4: bank.AuthToken authToken
     ) throws (
-        1: bank.Unauthorized unauthorized,
-        2: money.InvalidCurrency eic,
-        3: money.InvalidAmount eia,
-        4: bank.InvalidDate eid
+//        1: money.InvalidCurrency eic,
+//        2: money.InvalidAmount eia,
+//        3: bank.InvalidDueDate eidd,
+//        4: bank.Unauthenticated unauthenticated,
+//        5: bank.Unauthorized unauthorized,
+        1: errors.ArgumentError argumentError,
+        2: bank.Unauthenticated unauthenticated,
+        3: bank.Unauthorized unauthorized,
+
     )
 }
