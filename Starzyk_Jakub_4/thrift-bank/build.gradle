@@ -19,6 +19,11 @@ dependencies {
     compile group: 'javax.annotation', name: 'javax.annotation-api', version: '1.3.2'
     compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.26'
     compile group: 'commons-codec', name: 'commons-codec', version: '1.12'
+    compile group: 'org.javamoney', name: 'moneta', version: '1.3'
+    // https://mvnrepository.com/artifact/org.reflections/reflections
+    compile group: 'org.reflections', name: 'reflections', version: '0.9.11'
+
+
 
 }
 

@@ -1,27 +1,21 @@
 namespace java errors
 
 struct InvalidFirstName {
-//    1: string message
 }
 
 struct InvalidLastName {
-//    1: string message
 }
 
 struct InvalidID {
-//    1: string message
-}
-//
-struct InvalidDueDate {
-//    1: string message
 }
 
 struct InvalidAmount {
-//    1: string message
 }
 
 struct InvalidCurrency {
-//    1: string message
+}
+
+struct InvalidDueDate {
 }
 
 union UArgumentError {

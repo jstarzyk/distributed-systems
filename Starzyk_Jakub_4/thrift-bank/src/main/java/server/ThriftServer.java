@@ -1,6 +1,7 @@
 package server;
 
 import account.AccountService;
+import enums.Currency;
 import org.apache.thrift.TMultiplexedProcessor;
 import org.apache.thrift.TProcessor;
 import org.apache.thrift.protocol.TBinaryProtocol;
@@ -10,12 +11,17 @@ import org.apache.thrift.server.TSimpleServer;
 import org.apache.thrift.transport.TServerSocket;
 import org.apache.thrift.transport.TServerTransport;
 import premium.PremiumService;
+import server.entities.Parser;
+import server.handlers.AccountHandler;
+import server.handlers.PremiumHandler;
+import server.handlers.StandardHandler;
 import standard.StandardService;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import javax.money.CurrencyUnit;
+import javax.money.Monetary;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ThriftServer {
 
@@ -28,12 +34,22 @@ public class ThriftServer {
     public static final String STANDARD_NAME = "standard";
     public static final String PREMIUM_NAME = "premium";
 
-    private static String join(Set<String> serviceNames) {
-        return "[" + String.join(", ", serviceNames) + "]";
-    }
+//    private static final Stream<CurrencyUnit> CURRENCIES = Stream.of("PLN", "USD", "EUR", "GBP", "CHF")
+    private static final Stream<CurrencyUnit> CURRENCIES = Stream.of(Currency.values()).map(Enum::toString)
+//            .map(Monetary::getCurrency).collect(Collectors.toSet());
+            .map(Monetary::getCurrency);
+
+    // TODO
+    public static final Stream<CurrencyUnit> currencies = Stream.of(Monetary.getCurrency("PLN"), Monetary.getCurrency("USD"));
+    public static final Set<String> currencyCodes = currencies.map(CurrencyUnit::getCurrencyCode).collect(Collectors.toSet());
+
+
+//    public static String join(Collection<String> serviceNames) {
+//        return "[" + String.join(", ", serviceNames) + "]";
+//    }
 
     private static void serverStarted(String processorType, Set<String> serviceNames) {
-        System.out.println("Starting " + processorType + " server... " + join(serviceNames));
+        System.out.println("Starting " + processorType + " server... " + Parser.join(serviceNames));
     }
 
     public static void main(String[] args) {

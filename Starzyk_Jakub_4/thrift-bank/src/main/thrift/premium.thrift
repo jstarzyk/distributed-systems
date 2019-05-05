@@ -1,23 +1,20 @@
 include "auth.thrift"
 include "errors.thrift"
 include "standard.thrift"
-//include "credit.thrift"
-include "money.thrift"
 
 namespace java premium
 
-struct CreditSummary {
-    1: money.Money domesticTotal,
-    2: optional money.Money foreignTotal,
+struct CreditInfo {
+    1: string domesticTotal,
+    2: optional string foreignTotal,
 }
 
 service PremiumService extends standard.StandardService {
-//    credit.CreditSummary credit(
-    CreditSummary credit(
-        1: string currency,
-        2: string amount,
+    CreditInfo credit(
+        1: string amount,
+        2: string currencyCode,
         3: string dueDate,
-        4: auth.AuthToken token
+        4: auth.AuthToken token,
     ) throws (
         1: errors.ArgumentError argumentError,
         2: auth.Unauthenticated unauthenticated,

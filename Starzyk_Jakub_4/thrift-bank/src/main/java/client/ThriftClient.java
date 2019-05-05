@@ -1,49 +1,65 @@
 package client;
 
-import account.Account;
+import account.AccountInfo;
 import account.AccountService;
 import auth.AuthToken;
 import auth.Unauthenticated;
 import auth.Unauthorized;
+import enums.ServiceMethod;
 import errors.ArgumentError;
-import money.Money;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TMultiplexedProtocol;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
-import premium.CreditSummary;
+import premium.CreditInfo;
 import premium.PremiumService;
 import standard.StandardService;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static server.ThriftServer.*;
 
 public class ThriftClient {
 
     private static BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-    private static Set<String> operations = new LinkedHashSet<>();
+    private static String operations = String.join(", ",
+            Stream.of(ServiceMethod.values())
+                    .map(Enum::toString)
+                    .collect(Collectors.toSet()));
 
-    private static boolean isAccount(String line) {
-        return line.equals("a") || line.equals("account");
+    private static ServiceMethod parseServiceMethod(String line) {
+        ServiceMethod account = ServiceMethod.ACCOUNT;
+        ServiceMethod balance = ServiceMethod.BALANCE;
+        ServiceMethod credit = ServiceMethod.CREDIT;
+        var stream = Stream.of(account, balance, credit);
+        return stream.filter(
+                s -> s.toString().substring(0, 1).equals(line.substring(0, 1).toUpperCase())
+                || s.toString().equals(line.toUpperCase()))
+                .findFirst()
+                .orElse(null);
     }
 
-    private static boolean isBalance(String line) {
-        return line.equals("b") || line.equals("balance");
-    }
-
-    private static boolean isCredit(String line) {
-        return line.equals("c") || line.equals("credit");
-    }
+//    private static boolean isAccount(String line) {
+//        return line.equals("a") || line.equals("account");
+//    }
+//
+//    private static boolean isBalance(String line) {
+//        return line.equals("b") || line.equals("balance");
+//    }
+//
+//    private static boolean isCredit(String line) {
+//        return line.equals("c") || line.equals("credit");
+//    }
 
     private static void printAvailableOperations() {
-        System.out.println("Available operations: " + String.join(", ", operations));
+        System.out.println("Available operations: " + operations);
         System.out.println();
     }
 
@@ -105,9 +121,6 @@ public class ThriftClient {
         String line = "";
         boolean repeatOperation = false;
 
-        operations.add("ACCOUNT");
-        operations.add("BALANCE");
-        operations.add("CREDIT");
         printAvailableOperations();
 
         while (true) {
@@ -125,64 +138,33 @@ public class ThriftClient {
             }
 
             try {
-                if (isAccount(line)) {
+                ServiceMethod serviceMethod = parseServiceMethod(line);
+
+                if (serviceMethod == null) {
+                    printAvailableOperations();
+                } else if (serviceMethod == ServiceMethod.ACCOUNT) {
                     String firstName = readArgument("first name");
                     String lastName = readArgument("last name");
                     String id = readArgument("PESEL");
-                    String limit = readArgument("income limit");
-                    Account account = accountClient.account(firstName, lastName, id, limit);
-                    received(account);
-//                } catch (InvalidFirstName eifn) {
-//                    printErrorMessage(eifn.message);
-//                } catch (InvalidLastName eiln) {
-//                    printErrorMessage(eiln.message);
-//                } catch (InvalidID eid) {
-//                    printErrorMessage(eid.message);
-//                } catch (InvalidAmount eia) {
-//                    printErrorMessage(eia.message);
-//                } catch (ArgumentError argumentError) {
-//                    printErrorMessage(argumentError.message);
-//                    repeatOperation = tryAgain();
-//                } finally {
-//                    nextOperation();
-//                }
-                } else if (isBalance(line)) {
-//                try {
+                    String monthlyLimit = readArgument("monthly income limit");
+                    String currencyCode = readArgument("currency code");
+
+                    AccountInfo accountInfo = accountClient.account(firstName, lastName, id, monthlyLimit, currencyCode);
+                    received(accountInfo);
+                } else if (serviceMethod == ServiceMethod.BALANCE) {
                     AuthToken authToken = authToken();
-                    Money balance = standardClient.balance(authToken);
+
+                    String balance = standardClient.balance(authToken);
                     received(balance);
-//                } catch (Unauthenticated unauthenticated) {
-//                    printErrorMessage(unauthenticated.message);
-//                    repeatOperation = tryAgain();
-//                } finally {
-//                    nextOperation();
-//                }
-                } else if (isCredit(line)) {
-//                try {
-                    String currency = readArgument("currency");
+                } else if (serviceMethod == ServiceMethod.CREDIT) {
                     String amount = readArgument("amount");
+                    String currencyCode = readArgument("currency code");
                     String dueDate = readArgument("due date");
+
                     AuthToken authToken = authToken();
-                    CreditSummary creditSummary = premiumClient.credit(currency, amount, dueDate, authToken);
-                    received(creditSummary);
-//                } catch (Unauthenticated unauthenticated) {
-//                    printErrorMessage(unauthenticated.message);
-//                     try again authentication
-//                } catch (Unauthorized unauthorized) {
-//                    printErrorMessage(unauthorized.message);
-//                } catch (InvalidCurrency eic) {
-//                    printErrorMessage(eic.message);
-//                } catch (InvalidAmount eia) {
-//                    printErrorMessage(eia.message);
-//                } catch (InvalidDueDate eidd) {
-//                    printErrorMessage(eidd.message);
-//                } catch (ArgumentError argumentError) {
-//                    printErrorMessage(argumentError.message);
-//                } finally {
-//                    nextOperation();
-//                }
-                } else {
-                    printAvailableOperations();
+
+                    CreditInfo creditInfo = premiumClient.credit(amount, currencyCode, dueDate, authToken);
+                    received(creditInfo);
                 }
             } catch (ArgumentError argumentError) {
                 printErrorMessage(argumentError.message);
@@ -196,7 +178,6 @@ public class ThriftClient {
                 nextOperation();
             }
         }
-
-
     }
+
 }
