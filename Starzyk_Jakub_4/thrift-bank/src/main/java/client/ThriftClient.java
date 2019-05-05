@@ -1,30 +1,34 @@
 package client;
 
 import account.Account;
+import account.AccountService;
 import auth.AuthToken;
 import auth.Unauthenticated;
 import auth.Unauthorized;
-import bank.AccountService;
-import bank.PremiumService;
-import bank.StandardService;
-import credit.CreditSummary;
 import errors.ArgumentError;
 import money.Money;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
-import org.apache.thrift.protocol.TProtocol;
+import org.apache.thrift.protocol.TMultiplexedProtocol;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
+import premium.CreditSummary;
+import premium.PremiumService;
+import standard.StandardService;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+import static server.ThriftServer.*;
 
 public class ThriftClient {
 
     private static BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-//    private static MessageDigest digest = MessageDigest.getInstance(SHA_2);
+    private static Set<String> operations = new LinkedHashSet<>();
 
     private static boolean isAccount(String line) {
         return line.equals("a") || line.equals("account");
@@ -38,12 +42,13 @@ public class ThriftClient {
         return line.equals("c") || line.equals("credit");
     }
 
-//    private static String readLowerCase() throws IOException {
-//        return br.readLine().toLowerCase();
-//    }
+    private static void printAvailableOperations() {
+        System.out.println("Available operations: " + String.join(", ", operations));
+        System.out.println();
+    }
 
     private static String readArgument(String parameterName) throws IOException {
-        System.out.println("Enter " + parameterName + ": ");
+        System.out.print("Enter " + parameterName + ": ");
         return br.readLine();
     }
 
@@ -75,35 +80,46 @@ public class ThriftClient {
 
     public static void main(String [] args) throws IOException {
         try {
-            TTransport transport;
+            accountTransport.open();
+            bankTransport.open();
 
-            transport = new TSocket("localhost", 9090);
-            transport.open();
+            perform();
 
-            TProtocol protocol = new TBinaryProtocol(transport);
-            perform(protocol);
-
-            transport.close();
+            accountTransport.close();
+            bankTransport.close();
         } catch (TException e) {
             e.printStackTrace();
         }
     }
 
-    private static void perform(TProtocol protocol) throws TException, IOException {
-//    private static void perform(AccountService.Client accountClient) throws TException, IOException {
-//    private static void perform() throws TException, IOException {
-//        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        var accountClient = new AccountService.Client(protocol);
-        var standardClient = new StandardService.Client(protocol);
-        var premiumClient = new PremiumService.Client(protocol);
-//        var bankClient = new BankService.Client(protocol);
-//        BankService.Client bankClient = null;
-        String line = null;
+    private static TTransport accountTransport = new TSocket(LOCALHOST, ACCOUNT_PORT);
+    private static TTransport bankTransport = new TSocket(LOCALHOST, BANK_PORT);
+
+    private static void perform() throws TException, IOException {
+        var bankProtocol = new TBinaryProtocol(bankTransport);
+
+        var accountClient = new AccountService.Client(new TBinaryProtocol(accountTransport));
+        var standardClient = new StandardService.Client(new TMultiplexedProtocol(bankProtocol, STANDARD_NAME));
+        var premiumClient = new PremiumService.Client(new TMultiplexedProtocol(bankProtocol, PREMIUM_NAME));
+
+        String line = "";
         boolean repeatOperation = false;
+
+        operations.add("ACCOUNT");
+        operations.add("BALANCE");
+        operations.add("CREDIT");
+        printAvailableOperations();
 
         while (true) {
             if (!repeatOperation) {
-                line = br.readLine().toLowerCase();
+                while (true) {
+                    line = br.readLine();
+                    if (line.isEmpty()) {
+                        printAvailableOperations();
+                    } else {
+                        break;
+                    }
+                }
             } else {
                 repeatOperation = false;
             }
@@ -114,7 +130,6 @@ public class ThriftClient {
                     String lastName = readArgument("last name");
                     String id = readArgument("PESEL");
                     String limit = readArgument("income limit");
-//                try {
                     Account account = accountClient.account(firstName, lastName, id, limit);
                     received(account);
 //                } catch (InvalidFirstName eifn) {
@@ -166,6 +181,8 @@ public class ThriftClient {
 //                } finally {
 //                    nextOperation();
 //                }
+                } else {
+                    printAvailableOperations();
                 }
             } catch (ArgumentError argumentError) {
                 printErrorMessage(argumentError.message);
