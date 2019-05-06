@@ -1,7 +1,9 @@
 package server;
 
 import account.AccountService;
+import client.GrpcClient;
 import enums.Currency;
+import exchange.ExchangeOuterClass;
 import org.apache.thrift.TMultiplexedProcessor;
 import org.apache.thrift.TProcessor;
 import org.apache.thrift.protocol.TBinaryProtocol;
@@ -76,18 +78,30 @@ public class ThriftServer {
         }
     }
 
+    private static void requestCurrencyRates(Set<CurrencyUnit> currencies) {
+        try {
+            GrpcClient.start();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
     private static void serverStarted(String processorType, Set<String> serviceNames, int port) {
         System.out.println("Starting " + processorType + " server... " + Parser.join(serviceNames) + " (" + port + ")");
     }
 
     public static void main(String[] args) {
         try {
+            requestCurrencyRates(null);
+
             currencies = inputCurrencies();
             if (currencies == null) {
                 return;
             }
             var tokens = currencies.stream().map(CurrencyUnit::getCurrencyCode).collect(Collectors.toSet());
             System.out.println("Registering currencies... " + Parser.join(tokens));
+
+
 
             SecurityManager.configure();
 

@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package exchange;
+
+enum CurrencyCode {
+    PLN = 0;
+    USD = 1;
+    EUR = 2;
+    GBP = 3;
+    CHF = 4;
+}
+
+message CurrencyRate {
+    CurrencyCode code = 1;
+    double rate = 2;
+}
+
+message ExchangeRateRequest {
+    repeated CurrencyCode codes = 2;
+}
+
+message ExchangeRateResponse {
+    repeated CurrencyRate rates = 1;
+}
+
+service Exchange {
+//    rpc CurrentRates(ExchangeRateRequest) returns (ExchangeRateResponse) {}
+    rpc StreamRates(ExchangeRateRequest) returns (stream CurrencyRate) {}
+}
