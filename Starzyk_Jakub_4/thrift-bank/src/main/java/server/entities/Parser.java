@@ -40,9 +40,11 @@ public abstract class Parser {
     }
 
     public static CurrencyUnit parseCurrencyUnit(String s) {
-        return BankServer.currencies.stream().filter(c -> c.getCurrencyCode().equals(s.toUpperCase()))
-                .findAny()
-                .orElse(null);
+        return Bank.BANK_CURRENCY.getCurrencyCode().equals(s.toUpperCase()) ? Bank.BANK_CURRENCY :
+                BankServer.availableCurrencies.stream()
+                        .filter(c -> c.getCurrencyCode().equals(s.toUpperCase()))
+                        .findAny()
+                        .orElse(null);
     }
 
     public static Date parseDate(String s) {

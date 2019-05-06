@@ -66,7 +66,7 @@ public class PremiumHandler extends StandardHandler implements PremiumService.If
                 Money baseValue = Money.of(bigDecimal, currencyUnit);
                 Money totalValue = Bank.calculateTotalCreditValue(id, baseValue, date);
                 CurrencyUnit accountCurrency = account.getCurrency();
-                CurrencyUnit creditCurrency = baseValue.getCurrency();
+                CurrencyUnit creditCurrency = totalValue.getCurrency();
                 CreditInfo creditInfo = new CreditInfo();
 
                 // can't be null, because authenticated

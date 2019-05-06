@@ -1,41 +1,58 @@
-from concurrent import futures
-import time
 import logging
+import time
+from concurrent import futures
+from random import randint
 
 import grpc
 
 import exchange_pb2
 import exchange_pb2_grpc
 
+RATES = {
+    'PLN': 1,
+    'USD': 3.6,
+    'EUR': 4,
+    'GBP': 5,
+    'CHF': 4.5
+}
+
+PORT = 50051
 
 
 class Exchange(exchange_pb2_grpc.ExchangeServicer):
 
-    # rates = e
-
-    def set_rates(self):
-
-
     def StreamRates(self, request, context):
         # print(request.codes)
+        print('Received request for:')
+        print(request)
+
         codes = request.codes
 
-        # print(context)
-        # r = [exchange_pb2.CurrencyRate()]
-        yield exchange_pb2.CurrencyRate(code=exchange_pb2.EUR, rate=0.21)
-        yield exchange_pb2.CurrencyRate(code=exchange_pb2.USD, rate=0.29)
-        # return exchange_pb2.
-        # return exchange_pb2.CurrencyRate(code=)
+        while True:
+            val = randint(-100, 100) / 100
 
-    # def SayHello(self, request, context):
-    #     return helloworld_pb2.HelloReply(message='Hello, %s!' % request.name)
+            for c in codes:
+                res = exchange_pb2.CurrencyRate(
+                    code=c,
+                    rate=RATES.get(exchange_pb2.CurrencyCode.Name(c)) + val)
+
+                print('Sending...')
+                print(res)
+
+                yield res
+
+            time.sleep(5)
 
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     exchange_pb2_grpc.add_ExchangeServicer_to_server(Exchange(), server)
-    server.add_insecure_port('[::]:50051')
+
+    print('Starting exchange... (' + str(PORT) + ')')
+
+    server.add_insecure_port('[::]:' + str(PORT))
     server.start()
+
     try:
         while True:
             time.sleep(60)

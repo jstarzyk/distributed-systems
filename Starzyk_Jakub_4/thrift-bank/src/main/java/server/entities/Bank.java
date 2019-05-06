@@ -6,12 +6,13 @@ import server.operations.Operation;
 
 import javax.money.CurrencyUnit;
 import javax.money.Monetary;
+import javax.money.NumberValue;
 import java.math.BigDecimal;
 import java.util.*;
 
 public abstract class Bank {
 
-    public static final CurrencyUnit bankCurrency = Monetary.getCurrency("PLN");
+    public static final CurrencyUnit BANK_CURRENCY = Monetary.getCurrency("PLN");
 
     private static List<Account> accounts = new ArrayList<>();
     private static List<Operation> executed = new LinkedList<>();
@@ -46,17 +47,24 @@ public abstract class Bank {
     }
 
     public static Money convert(Money fromMoney, CurrencyUnit toUnit) {
-        if (fromMoney.getCurrency().equals(bankCurrency)) {
+        NumberValue nv;
+
+        if (fromMoney.getCurrency().equals(BANK_CURRENCY)) {
             if (currencyRates.containsKey(toUnit)) {
-                return fromMoney.divide(currencyRates.get(toUnit));
+                nv = fromMoney.divide(currencyRates.get(toUnit))
+                        .getNumber();
                 //
             } else {
                 return null;
             }
         } else if (currencyRates.containsKey(fromMoney.getCurrency())) {
             if (currencyRates.containsKey(toUnit)) {
-                return fromMoney.multiply(currencyRates.get(fromMoney.getCurrency()))
-                        .divide(currencyRates.get(toUnit));
+                nv = fromMoney.multiply(currencyRates.get(fromMoney.getCurrency()))
+                        .divide(currencyRates.get(toUnit))
+                        .getNumber();
+            } else if (BANK_CURRENCY.equals(toUnit)) {
+                nv = fromMoney.multiply(currencyRates.get(fromMoney.getCurrency()))
+                        .getNumber();
             } else {
                 return null;
             }
@@ -64,6 +72,7 @@ public abstract class Bank {
             return null;
         }
 
+        return Money.of(nv, toUnit);
 //        return money.with(MonetaryConversions.getConversion(unit));
     }
 

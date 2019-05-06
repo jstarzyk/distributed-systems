@@ -6,6 +6,7 @@
 **/build
 info.txt
 .resourceCache/
+**/__pycache__/
 
 # Compiled class file
 *.class

@@ -42,11 +42,10 @@ public class BankServer {
 
     private static BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-    private static Set<CurrencyUnit> availableCurrencies = Stream.of(Currency.values()).map(Enum::toString)
-        .map(Monetary::getCurrency)
-        .collect(Collectors.toSet());
-
-    public static Set<CurrencyUnit> currencies = null;
+    public static Set<CurrencyUnit> availableCurrencies = Stream.of(Currency.values()).filter(c -> !c.equals(Currency.PLN))
+            .map(Enum::toString)
+            .map(Monetary::getCurrency)
+            .collect(Collectors.toSet());
 
     private static void printError(String message) {
         System.out.println("ERROR: " + message);
@@ -56,23 +55,28 @@ public class BankServer {
         try {
             System.out.print("Enter currency codes: ");
 
-            var inputCurrencies = Stream.of(br.readLine().split("\\s+"))
+            var inputCurrencies = br.readLine().split("\\s+");
+            if (inputCurrencies.length == 0) {
+                return availableCurrencies;
+            }
+
+            var result = Arrays.stream(inputCurrencies)
                     .map(String::toUpperCase)
                     .map(Monetary::getCurrency)
                     .collect(Collectors.toSet());
-            inputCurrencies.retainAll(availableCurrencies);
+            result.retainAll(availableCurrencies);
 
             if (availableCurrencies.isEmpty()) {
                 printError("Currency codes not specified in interface");
                 return null;
-            } else if (inputCurrencies.isEmpty()) {
+            } else if (result.isEmpty()) {
                 printError("No currency codes / Currencies not specified in interface");
                 return availableCurrencies;
             } else {
-                return inputCurrencies;
+                return result;
             }
         } catch (UnknownCurrencyException e) {
-            printError("One or more currency codes invalid");
+//            printError("One or more currency codes invalid");
             return availableCurrencies;
         }
     }
@@ -97,14 +101,15 @@ public class BankServer {
 
     public static void main(String[] args) {
         try {
-            System.out.println(Bank.bankCurrency);
+            System.out.println(Bank.BANK_CURRENCY);
 
-            currencies = inputCurrencies();
+            Set<CurrencyUnit> currencies = inputCurrencies();
             if (currencies == null) {
                 return;
             }
             var tokens = currencies.stream().map(CurrencyUnit::getCurrencyCode).collect(Collectors.toSet());
             System.out.println("Registering currencies... " + Parser.join(tokens));
+            System.out.println("Registering domestic currency: " + Bank.BANK_CURRENCY.getCurrencyCode());
 
             SecurityManager.configure();
 

@@ -62,9 +62,9 @@ public class ExchangeClient {
             logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus());
             return;
         }
-//        response.forEachRemaining(r -> System.out.println(r.toString()));
+
         response.forEachRemaining(r -> {
-            System.out.println(r.toString());
+//            System.out.println(r.toString());
             Bank.addCurrencyRate(Monetary.getCurrency(r.getCode().toString()), new BigDecimal(r.getRate()));
         });
 //        logger.info("Greeting: " + response..getMessage());
