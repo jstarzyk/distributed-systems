@@ -23,9 +23,9 @@ import java.io.InputStreamReader;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static server.ThriftServer.*;
+import static server.BankServer.*;
 
-public class ThriftClient {
+public class BankClient {
 
     private static BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
     private static String availableOperations = "[" + Stream.of(

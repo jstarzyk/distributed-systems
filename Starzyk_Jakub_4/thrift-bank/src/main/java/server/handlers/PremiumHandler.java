@@ -72,9 +72,9 @@ public class PremiumHandler extends StandardHandler implements PremiumService.If
                 // can't be null, because authenticated
                 if (!creditCurrency.equals(accountCurrency)) {
                     // TODO conversions
-                    Money domesticTotal = Bank.convert(totalValue, accountCurrency);
+                    Money totalInAccountCurrency = Bank.convert(totalValue, accountCurrency);
 //                    var domesticTotal = totalValue.with(MonetaryConversions.getConversion(accountCurrency));
-                    creditInfo.setDomesticTotal(domesticTotal.toString());
+                    creditInfo.setDomesticTotal(totalInAccountCurrency.toString());
                     creditInfo.setForeignTotal(totalValue.toString());
                 } else {
                     creditInfo.setDomesticTotal(totalValue.toString());

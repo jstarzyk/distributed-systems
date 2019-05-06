@@ -1,6 +1,6 @@
 package server.entities;
 
-import server.ThriftServer;
+import server.BankServer;
 
 import javax.money.CurrencyUnit;
 import java.math.BigDecimal;
@@ -40,7 +40,7 @@ public abstract class Parser {
     }
 
     public static CurrencyUnit parseCurrencyUnit(String s) {
-        return ThriftServer.currencies.stream().filter(c -> c.getCurrencyCode().equals(s.toUpperCase()))
+        return BankServer.currencies.stream().filter(c -> c.getCurrencyCode().equals(s.toUpperCase()))
                 .findAny()
                 .orElse(null);
     }

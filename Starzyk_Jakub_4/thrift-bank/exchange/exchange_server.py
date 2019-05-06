@@ -8,11 +8,19 @@ import exchange_pb2
 import exchange_pb2_grpc
 
 
+
 class Exchange(exchange_pb2_grpc.ExchangeServicer):
 
+    # rates = e
+
+    def set_rates(self):
+
+
     def StreamRates(self, request, context):
-        print(request)
-        print(context)
+        # print(request.codes)
+        codes = request.codes
+
+        # print(context)
         # r = [exchange_pb2.CurrencyRate()]
         yield exchange_pb2.CurrencyRate(code=exchange_pb2.EUR, rate=0.21)
         yield exchange_pb2.CurrencyRate(code=exchange_pb2.USD, rate=0.29)

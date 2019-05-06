@@ -1,18 +1,21 @@
 package server.entities;
 
 import account.AccountType;
-import enums.Currency;
 import org.javamoney.moneta.Money;
 import server.operations.Operation;
 
 import javax.money.CurrencyUnit;
-import javax.money.convert.MonetaryConversions;
+import javax.money.Monetary;
+import java.math.BigDecimal;
 import java.util.*;
 
 public abstract class Bank {
 
+    public static final CurrencyUnit bankCurrency = Monetary.getCurrency("PLN");
+
     private static List<Account> accounts = new ArrayList<>();
     private static List<Operation> executed = new LinkedList<>();
+    private static Map<CurrencyUnit, BigDecimal> currencyRates = new HashMap<>();
 
     public static Account findAccount(String id) {
         return accounts.stream().filter(a -> a.getId().equals(id)).findAny().orElse(null);
@@ -42,8 +45,26 @@ public abstract class Bank {
         return AccountType.PREMIUM;
     }
 
-    public static Money convert(Money money, CurrencyUnit unit) {
-        return money.with(MonetaryConversions.getConversion(unit));
+    public static Money convert(Money fromMoney, CurrencyUnit toUnit) {
+        if (fromMoney.getCurrency().equals(bankCurrency)) {
+            if (currencyRates.containsKey(toUnit)) {
+                return fromMoney.divide(currencyRates.get(toUnit));
+                //
+            } else {
+                return null;
+            }
+        } else if (currencyRates.containsKey(fromMoney.getCurrency())) {
+            if (currencyRates.containsKey(toUnit)) {
+                return fromMoney.multiply(currencyRates.get(fromMoney.getCurrency()))
+                        .divide(currencyRates.get(toUnit));
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
+
+//        return money.with(MonetaryConversions.getConversion(unit));
     }
 
     public static Operation executeLastOperation(String id) {
@@ -56,6 +77,10 @@ public abstract class Bank {
         account.getExecuted().add(operation);
         executed.add(operation);
         return operation;
+    }
+
+    public static void addCurrencyRate(CurrencyUnit code, BigDecimal rate) {
+        currencyRates.put(code, rate);
     }
 
 }

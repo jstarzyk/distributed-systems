@@ -1,9 +1,7 @@
 package server;
 
 import account.AccountService;
-import client.GrpcClient;
 import enums.Currency;
-import exchange.ExchangeOuterClass;
 import org.apache.thrift.TMultiplexedProcessor;
 import org.apache.thrift.TProcessor;
 import org.apache.thrift.protocol.TBinaryProtocol;
@@ -13,6 +11,7 @@ import org.apache.thrift.server.TSimpleServer;
 import org.apache.thrift.transport.TServerSocket;
 import org.apache.thrift.transport.TServerTransport;
 import premium.PremiumService;
+import server.entities.Bank;
 import server.entities.Parser;
 import server.entities.SecurityManager;
 import server.handlers.AccountHandler;
@@ -30,7 +29,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ThriftServer {
+public class BankServer {
 
     public static final int ACCOUNT_PORT = 9090;
     public static final int BANK_PORT = 9070;
@@ -78,12 +77,18 @@ public class ThriftServer {
         }
     }
 
-    private static void requestCurrencyRates(Set<CurrencyUnit> currencies) {
-        try {
-            GrpcClient.start();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+//    private static void startExchangeClient(Set<CurrencyUnit> currencies) {
+    private static void startExchangeClient(Set<CurrencyUnit> currencies) {
+        Runnable exchangeClient = () -> {
+            try {
+//                ExchangeClient.start(offset, currencies);
+                ExchangeClient.start(currencies);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        };
+
+        new Thread(exchangeClient).start();
     }
 
     private static void serverStarted(String processorType, Set<String> serviceNames, int port) {
@@ -92,7 +97,7 @@ public class ThriftServer {
 
     public static void main(String[] args) {
         try {
-            requestCurrencyRates(null);
+            System.out.println(Bank.bankCurrency);
 
             currencies = inputCurrencies();
             if (currencies == null) {
@@ -100,8 +105,6 @@ public class ThriftServer {
             }
             var tokens = currencies.stream().map(CurrencyUnit::getCurrencyCode).collect(Collectors.toSet());
             System.out.println("Registering currencies... " + Parser.join(tokens));
-
-
 
             SecurityManager.configure();
 
@@ -112,6 +115,9 @@ public class ThriftServer {
             final int offset = Integer.valueOf(args[0]);
             int accountPort = ACCOUNT_PORT + offset;
             int bankPort = BANK_PORT + offset;
+
+//            startExchangeClient(offset, currencies);
+            startExchangeClient(currencies);
 
             Runnable account = () -> simple(ACCOUNT_NAME, new AccountService.Processor<>(
                     new AccountHandler()), accountPort);
