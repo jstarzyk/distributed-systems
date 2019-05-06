@@ -11,5 +11,6 @@ enum Currency {
 enum ServiceMethod {
     ACCOUNT,
     BALANCE,
-    CREDIT
+    CREDIT,
+    CONFIRM
 }

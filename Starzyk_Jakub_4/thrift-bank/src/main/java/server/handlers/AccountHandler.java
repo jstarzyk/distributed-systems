@@ -3,13 +3,13 @@ package server.handlers;
 import account.AccountInfo;
 import account.AccountService;
 import account.AccountType;
+import enums.ServiceMethod;
 import errors.*;
 import org.apache.thrift.TException;
 import org.javamoney.moneta.Money;
 import server.entities.Account;
 import server.entities.Bank;
 import server.entities.Parser;
-import server.ThriftServer;
 
 import java.math.BigDecimal;
 
@@ -17,21 +17,23 @@ public class AccountHandler implements AccountService.Iface {
 
     @Override
     public AccountInfo account(String firstName, String lastName, String id, String monthlyLimit, String currencyCode) throws TException {
+        Handlers.log(ServiceMethod.ACCOUNT);
+
         ArgumentError argumentError = new ArgumentError();
 
-        if (Parser.validateFirstName(firstName)) {
+        if (!Parser.validateFirstName(firstName)) {
             argumentError.error = UArgumentError.ifn(new InvalidFirstName());
             argumentError.message = "Invalid first name";
             throw argumentError;
         }
 
-        if (Parser.validateLastName(lastName)) {
+        if (!Parser.validateLastName(lastName)) {
             argumentError.error = UArgumentError.iln(new InvalidLastName());
             argumentError.message = "Invalid last name";
             throw argumentError;
         }
 
-        if (Parser.validateID(id)) {
+        if (!Parser.validateID(id)) {
             argumentError.error = UArgumentError.iid(new InvalidID());
             argumentError.message = "Invalid ID";
             throw argumentError;
@@ -52,7 +54,7 @@ public class AccountHandler implements AccountService.Iface {
         var currencyUnit = Parser.parseCurrencyUnit(currencyCode);
         if (currencyUnit == null) {
             argumentError.error = UArgumentError.ic(new InvalidCurrency());
-            argumentError.message = "Invalid currency: " + currencyCode + ", available: " + Parser.join(ThriftServer.currencyCodes);
+            argumentError.message = "Invalid currency code";
             throw argumentError;
         }
 

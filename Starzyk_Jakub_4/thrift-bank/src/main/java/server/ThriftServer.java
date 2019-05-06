@@ -12,6 +12,7 @@ import org.apache.thrift.transport.TServerSocket;
 import org.apache.thrift.transport.TServerTransport;
 import premium.PremiumService;
 import server.entities.Parser;
+import server.entities.SecurityManager;
 import server.handlers.AccountHandler;
 import server.handlers.PremiumHandler;
 import server.handlers.StandardHandler;
@@ -19,6 +20,10 @@ import standard.StandardService;
 
 import javax.money.CurrencyUnit;
 import javax.money.Monetary;
+import javax.money.UnknownCurrencyException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -26,7 +31,7 @@ import java.util.stream.Stream;
 public class ThriftServer {
 
     public static final int ACCOUNT_PORT = 9090;
-    public static final int BANK_PORT = 9091;
+    public static final int BANK_PORT = 9070;
 
     public static final String LOCALHOST = "localhost";
 
@@ -34,33 +39,73 @@ public class ThriftServer {
     public static final String STANDARD_NAME = "standard";
     public static final String PREMIUM_NAME = "premium";
 
-//    private static final Stream<CurrencyUnit> CURRENCIES = Stream.of("PLN", "USD", "EUR", "GBP", "CHF")
-    private static final Stream<CurrencyUnit> CURRENCIES = Stream.of(Currency.values()).map(Enum::toString)
-//            .map(Monetary::getCurrency).collect(Collectors.toSet());
-            .map(Monetary::getCurrency);
+    private static BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-    // TODO
-    public static final Stream<CurrencyUnit> currencies = Stream.of(Monetary.getCurrency("PLN"), Monetary.getCurrency("USD"));
-    public static final Set<String> currencyCodes = currencies.map(CurrencyUnit::getCurrencyCode).collect(Collectors.toSet());
+    private static Set<CurrencyUnit> availableCurrencies = Stream.of(Currency.values()).map(Enum::toString)
+        .map(Monetary::getCurrency)
+        .collect(Collectors.toSet());
 
+    public static Set<CurrencyUnit> currencies = null;
 
-//    public static String join(Collection<String> serviceNames) {
-//        return "[" + String.join(", ", serviceNames) + "]";
-//    }
+    private static void printError(String message) {
+        System.out.println("ERROR: " + message);
+    }
 
-    private static void serverStarted(String processorType, Set<String> serviceNames) {
-        System.out.println("Starting " + processorType + " server... " + Parser.join(serviceNames));
+    private static Set<CurrencyUnit> inputCurrencies() throws IOException {
+        try {
+            System.out.print("Enter currency codes: ");
+
+            var inputCurrencies = Stream.of(br.readLine().split("\\s+"))
+                    .map(String::toUpperCase)
+                    .map(Monetary::getCurrency)
+                    .collect(Collectors.toSet());
+            inputCurrencies.retainAll(availableCurrencies);
+
+            if (availableCurrencies.isEmpty()) {
+                printError("Currency codes not specified in interface");
+                return null;
+            } else if (inputCurrencies.isEmpty()) {
+                printError("No currency codes / Currencies not specified in interface");
+                return availableCurrencies;
+            } else {
+                return inputCurrencies;
+            }
+        } catch (UnknownCurrencyException e) {
+            printError("One or more currency codes invalid");
+            return availableCurrencies;
+        }
+    }
+
+    private static void serverStarted(String processorType, Set<String> serviceNames, int port) {
+        System.out.println("Starting " + processorType + " server... " + Parser.join(serviceNames) + " (" + port + ")");
     }
 
     public static void main(String[] args) {
         try {
+            currencies = inputCurrencies();
+            if (currencies == null) {
+                return;
+            }
+            var tokens = currencies.stream().map(CurrencyUnit::getCurrencyCode).collect(Collectors.toSet());
+            System.out.println("Registering currencies... " + Parser.join(tokens));
+
+            SecurityManager.configure();
+
+            if (args.length < 1) {
+                return;
+            }
+
+            final int offset = Integer.valueOf(args[0]);
+            int accountPort = ACCOUNT_PORT + offset;
+            int bankPort = BANK_PORT + offset;
+
             Runnable account = () -> simple(ACCOUNT_NAME, new AccountService.Processor<>(
-                    new AccountHandler()), ACCOUNT_PORT);
+                    new AccountHandler()), accountPort);
 
             var services = new HashMap<String, TProcessor>();
             services.put(STANDARD_NAME, new StandardService.Processor<>(new StandardHandler()));
             services.put(PREMIUM_NAME, new PremiumService.Processor<>(new PremiumHandler()));
-            Runnable bank = () -> multiplexed(services, BANK_PORT);
+            Runnable bank = () -> multiplexed(services, bankPort);
 
             new Thread(account).start();
             new Thread(bank).start();
@@ -75,7 +120,7 @@ public class ThriftServer {
             TProtocolFactory protocolFactory = new TBinaryProtocol.Factory();
             TServer server = new TSimpleServer(new TServer.Args(serverTransport).protocolFactory(protocolFactory).processor(processor));
 
-            serverStarted("simple", Collections.singleton(serviceName));
+            serverStarted("simple", Collections.singleton(serviceName), port);
 
             server.serve();
         } catch (Exception e) {
@@ -95,7 +140,7 @@ public class ThriftServer {
             TProtocolFactory protocolFactory = new TBinaryProtocol.Factory();
             TServer server = new TSimpleServer(new TServer.Args(serverTransport).protocolFactory(protocolFactory).processor(processor));
 
-            serverStarted("multiplexed", services.keySet());
+            serverStarted("multiplexed", services.keySet(), port);
 
             server.serve();
         } catch (Exception e) {

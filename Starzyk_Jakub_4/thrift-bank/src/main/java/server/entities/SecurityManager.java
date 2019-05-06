@@ -2,8 +2,8 @@ package server.entities;
 
 import account.AccountType;
 import org.apache.commons.codec.digest.DigestUtils;
-import server.operations.AuthorizedOperation;
 import server.operations.Credit;
+import server.operations.Operation;
 
 import java.util.*;
 
@@ -16,9 +16,6 @@ public abstract class SecurityManager {
     private static Map<String, Set<AccountType>> authorization = new HashMap<>();
 
     public static void configure() {
-//        Reflections reflections = new Reflections("server");
-//        var c = reflections.getSubTypesOf(Operation.class);
-//        new Credit().getClass().getName()
         authorization.put(Credit.class.getName(), Set.of(AccountType.PREMIUM));
     }
 
@@ -26,10 +23,10 @@ public abstract class SecurityManager {
         String dbHash = authentication.get(id);
         return dbHash != null && dbHash.equals(passwordHash);
     }
-//
-    public static boolean authorize(String id, Class<? extends AuthorizedOperation> c) {
+
+    public static boolean authorize(String id, Class<? extends Operation> c) {
         Set<AccountType> dbSet = authorization.get(c.getName());
-        return dbSet != null && dbSet.contains(Bank.findAccount(id).category);
+        return dbSet != null && dbSet.contains(Bank.findAccount(id).getCategory());
     }
 
     public static void addCredentials(String id, String passwordHash) {
@@ -37,8 +34,8 @@ public abstract class SecurityManager {
     }
 
     public static String createPassword() {
-        // TODO
-        return "pass1";
+        String n = Long.valueOf(Math.round(Math.random() * 100)).toString();
+        return "pass" + n;
     }
 
     public static String hashPassword(String password) {

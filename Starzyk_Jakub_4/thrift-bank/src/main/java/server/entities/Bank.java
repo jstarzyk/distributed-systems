@@ -1,41 +1,21 @@
 package server.entities;
 
 import account.AccountType;
+import enums.Currency;
 import org.javamoney.moneta.Money;
-import server.operations.Credit;
 import server.operations.Operation;
 
+import javax.money.CurrencyUnit;
+import javax.money.convert.MonetaryConversions;
 import java.util.*;
 
 public abstract class Bank {
 
-//    public static final String UNAUTHENTICATED = "Invalid ID/password";
-//    public static final String UNAUTHORIZED = "Your account type does not permit this operation";
-
-//    private static Map<String, String> authentication = new HashMap<>();
-//    private static Map<String, Set<AccountType>> authorization = new HashMap<>();
     private static List<Account> accounts = new ArrayList<>();
-    private static List<Operation> operations = new LinkedList<>();
+    private static List<Operation> executed = new LinkedList<>();
 
-//    public static void configure() {
-////        Reflections reflections = new Reflections("server");
-////        var c = reflections.getSubTypesOf(Operation.class);
-////        new Credit().getClass().getName()
-//        authorization.put(Credit.class.getName(), Set.of(AccountType.PREMIUM));
-//    }
-
-//    public static boolean authenticate(String id, String passwordHash) {
-//        String dbHash = authentication.get(id);
-//        return dbHash != null && dbHash.equals(passwordHash);
-//    }
-
-//    public static boolean authorize(String id, Class<? extends AuthorizedOperation> c) {
-//        Set<AccountType> dbSet = authorization.get(c.getName());
-//        return dbSet != null && dbSet.contains(findAccount(id).category);
-//    }
-
-    static Account findAccount(String id) {
-        return accounts.stream().filter(a -> a.id.equals(id)).findAny().orElse(null);
+    public static Account findAccount(String id) {
+        return accounts.stream().filter(a -> a.getId().equals(id)).findAny().orElse(null);
     }
 
     public static boolean accountExists(String id) {
@@ -45,26 +25,37 @@ public abstract class Bank {
     public static String openAccount(Account account) {
         String password = SecurityManager.createPassword();
         String passwordHash = SecurityManager.hashPassword(password);
-        SecurityManager.addCredentials(account.id, passwordHash);
+        SecurityManager.addCredentials(account.getId(), passwordHash);
         accounts.add(account);
         return password;
     }
 
     public static Money viewAccountBalance(String id) {
-        return findAccount(id).balance;
+        return findAccount(id).getBalance();
     }
 
-    public static void takeCredit(String id, Money value, Date dueDate) {
-        Account account = findAccount(id);
-        Credit credit = new Credit(account, value, dueDate);
-        operations.add(credit);
-        credit.execute();
+    public static Money calculateTotalCreditValue(String id, Money value, Date dueDate) {
+        return value.multiply(1.03);
     }
 
     public static AccountType determineCategory(Money limit) {
-//         TODO
-        return AccountType.STANDARD;
+        return AccountType.PREMIUM;
     }
 
+    public static Money convert(Money money, CurrencyUnit unit) {
+        return money.with(MonetaryConversions.getConversion(unit));
+    }
+
+    public static Operation executeLastOperation(String id) {
+        Account account = findAccount(id);
+        Operation operation = account.getSubmitted().get(0);
+        if (operation == null) {
+            return null;
+        }
+        operation.execute();
+        account.getExecuted().add(operation);
+        executed.add(operation);
+        return operation;
+    }
 
 }

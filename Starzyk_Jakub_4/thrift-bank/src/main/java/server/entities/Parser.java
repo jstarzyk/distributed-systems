@@ -4,11 +4,14 @@ import server.ThriftServer;
 
 import javax.money.CurrencyUnit;
 import java.math.BigDecimal;
-import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public abstract class Parser {
+
+    public static final String DATE_FORMAT = "yyyy-MM-dd";
+    private static final SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
 
     public static String join(Collection<String> tokens) {
         return "[" + String.join(", ", tokens) + "]";
@@ -16,7 +19,8 @@ public abstract class Parser {
 
     public static boolean validateID(String s) {
         // TODO
-        return s.length() == 11 && s.chars().allMatch(Character::isDigit);
+//        return s.length() == 11 && s.chars().allMatch(Character::isDigit);
+        return true;
     }
 
     public static boolean validateFirstName(String s) {
@@ -36,14 +40,14 @@ public abstract class Parser {
     }
 
     public static CurrencyUnit parseCurrencyUnit(String s) {
-        return ThriftServer.currencies.filter(c -> c.getCurrencyCode().equals(s.toUpperCase()))
+        return ThriftServer.currencies.stream().filter(c -> c.getCurrencyCode().equals(s.toUpperCase()))
                 .findAny()
                 .orElse(null);
     }
 
     public static Date parseDate(String s) {
         try {
-            return DateFormat.getDateInstance().parse(s);
+            return sdf.parse(s);
         } catch (ParseException e) {
             return null;
         }

@@ -3,7 +3,9 @@
 **/.directory
 **/out
 **/src/generated
+**/build
 info.txt
+.resourceCache/
 
 # Compiled class file
 *.class
