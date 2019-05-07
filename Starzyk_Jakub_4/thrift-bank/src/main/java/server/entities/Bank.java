@@ -53,7 +53,6 @@ public abstract class Bank {
             if (currencyRates.containsKey(toUnit)) {
                 nv = fromMoney.divide(currencyRates.get(toUnit))
                         .getNumber();
-                //
             } else {
                 return null;
             }

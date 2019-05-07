@@ -24,6 +24,5 @@ message ExchangeRateResponse {
 }
 
 service Exchange {
-//    rpc CurrentRates(ExchangeRateRequest) returns (ExchangeRateResponse) {}
     rpc StreamRates(ExchangeRateRequest) returns (stream CurrencyRate) {}
 }

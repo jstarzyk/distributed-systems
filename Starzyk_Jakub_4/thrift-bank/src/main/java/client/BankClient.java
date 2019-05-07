@@ -88,24 +88,6 @@ public class BankClient {
         return new AuthToken(id, passwordHash);
     }
 
-//    private static class AccountArguments {
-//        String firstName;
-//        String lastName;
-//        String id;
-//        String monthlyLimit;
-//        String currencyCode;
-//    }
-//
-//    private static class BalanceArguments {
-//    }
-//
-//    private static class CreditArguments {
-//        String amount;
-//        String currencyCode;
-//        String dueDate;
-//    }
-
-
     public static void main(String [] args) throws IOException {
         try {
             if (args.length < 1) {
@@ -135,9 +117,7 @@ public class BankClient {
     private static int accountPort = ACCOUNT_PORT;
     private static int bankPort = BANK_PORT;
 
-//    private static TTransport accountTransport = new TSocket(LOCALHOST, accountPort);
     private static TTransport accountTransport;
-//    private static TTransport bankTransport = new TSocket(LOCALHOST, bankPort);
     private static TTransport bankTransport;
 
     private static void perform() throws TException, IOException {
@@ -151,10 +131,6 @@ public class BankClient {
         boolean repeatOperation = false;
 
         printAvailableOperations();
-
-//        AccountArguments accountArguments = new AccountArguments();
-//        BalanceArguments balanceArguments = new BalanceArguments();
-//        CreditArguments creditArguments = new CreditArguments();
 //
         while (true) {
             if (!repeatOperation) {
@@ -184,15 +160,11 @@ public class BankClient {
 
                     AccountInfo accountInfo = accountClient.account(firstName, lastName, id, monthlyLimit, currencyCode);
                     received(accountInfo);
-
-//                    accountArguments = new AccountArguments();
                 } else if (serviceMethod == ServiceMethod.BALANCE) {
                     AuthToken authToken = authToken();
 
                     String balance = standardClient.balance(authToken);
                     received(balance);
-
-//                    balanceArguments = new BalanceArguments();
                 } else if (serviceMethod == ServiceMethod.CREDIT) {
                     String amount = readArgument("amount");
                     String currencyCode = readArgument("currency code");
@@ -207,8 +179,6 @@ public class BankClient {
                         String result = standardClient.confirm(authToken);
                         received(result);
                     }
-
-//                    creditArguments = new CreditArguments();
                 }
             } catch (ArgumentError argumentError) {
                 printErrorMessage(argumentError.message);

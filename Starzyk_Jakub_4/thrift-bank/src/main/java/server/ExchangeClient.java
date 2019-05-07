@@ -1,7 +1,6 @@
 package server;
 
 import exchange.ExchangeGrpc;
-import exchange.ExchangeOuterClass;
 import exchange.ExchangeOuterClass.CurrencyCode;
 import exchange.ExchangeOuterClass.CurrencyRate;
 import exchange.ExchangeOuterClass.ExchangeRateRequest;
@@ -47,10 +46,6 @@ public class ExchangeClient {
                 .collect(Collectors.toSet());
     }
 
-//    private void received(CurrencyRate rate) {
-//        System.out.println("Received:");
-//    }
-
     private void send(Set<CurrencyCode> currencyCodes) {
         ExchangeRateRequest request = ExchangeRateRequest.newBuilder()
                 .addAllCodes(currencyCodes)
@@ -64,15 +59,11 @@ public class ExchangeClient {
         }
 
         response.forEachRemaining(r -> {
-//            System.out.println(r.toString());
             Bank.addCurrencyRate(Monetary.getCurrency(r.getCode().toString()), new BigDecimal(r.getRate()));
         });
-//        logger.info("Greeting: " + response..getMessage());
     }
 
-//    public static void start(int offset, Set<CurrencyUnit> currencies) throws InterruptedException {
     public static void start(Set<CurrencyUnit> currencies) throws InterruptedException {
-//        ExchangeClient client = new ExchangeClient("localhost", 50051 + offset);
         ExchangeClient client = new ExchangeClient("localhost", 50051);
         try {
             client.send(currencyCodes(currencies));

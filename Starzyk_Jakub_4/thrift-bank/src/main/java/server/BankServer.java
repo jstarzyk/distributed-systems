@@ -76,16 +76,13 @@ public class BankServer {
                 return result;
             }
         } catch (UnknownCurrencyException e) {
-//            printError("One or more currency codes invalid");
             return availableCurrencies;
         }
     }
 
-//    private static void startExchangeClient(Set<CurrencyUnit> currencies) {
     private static void startExchangeClient(Set<CurrencyUnit> currencies) {
         Runnable exchangeClient = () -> {
             try {
-//                ExchangeClient.start(offset, currencies);
                 ExchangeClient.start(currencies);
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -121,7 +118,6 @@ public class BankServer {
             int accountPort = ACCOUNT_PORT + offset;
             int bankPort = BANK_PORT + offset;
 
-//            startExchangeClient(offset, currencies);
             startExchangeClient(currencies);
 
             Runnable account = () -> simple(ACCOUNT_NAME, new AccountService.Processor<>(

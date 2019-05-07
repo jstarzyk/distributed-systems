@@ -18,7 +18,6 @@ public abstract class Parser {
     }
 
     public static boolean validateID(String s) {
-        // TODO
 //        return s.length() == 11 && s.chars().allMatch(Character::isDigit);
         return true;
     }
