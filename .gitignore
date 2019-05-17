@@ -7,6 +7,9 @@
 info.txt
 .resourceCache/
 **/__pycache__/
+*.iml
+*.ipr
+*.iws
 
 # Compiled class file
 *.class
