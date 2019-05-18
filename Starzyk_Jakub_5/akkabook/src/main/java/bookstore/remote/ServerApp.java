@@ -3,22 +3,30 @@ package bookstore.remote;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import akka.cluster.Cluster;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-public class Server {
+public class ServerApp {
 
     static final String TEST_PATH = "testPath";
 
     public static void main(String[] args) throws IOException {
-        final ActorSystem system = ActorSystem.create("bookstore_server");
+        File configFile = new File("config/server_app.conf");
+        Config config = ConfigFactory.parseFile(configFile);
+
+        final ActorSystem system = ActorSystem.create("bookstore_server", config);
+//        Cluster.get(system).
         final ActorRef actor = system.actorOf(Props.create(ServerActor.class), "server");
         System.out.println("Bookstore server started.\n" +
-                "Awaiting requests.");
+                "Awaiting requests...");
 
-        actor.tell(TEST_PATH, null);
+//        actor.tell(TEST_PATH, null);
 
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         while (true) {

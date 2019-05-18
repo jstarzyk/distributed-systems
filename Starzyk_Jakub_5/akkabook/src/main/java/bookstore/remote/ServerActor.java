@@ -36,7 +36,7 @@ public class ServerActor extends AbstractActor {
                     context().child(worker).get().tell(bookRequest, getSender());
                 })
                 .match(String.class, s -> {
-                    if (s.equals(Server.TEST_PATH)) {
+                    if (s.equals(ServerApp.TEST_PATH)) {
                         System.out.println(getSelf().path().toString());
                     }
                 })

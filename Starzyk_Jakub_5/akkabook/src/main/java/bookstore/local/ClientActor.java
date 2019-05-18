@@ -13,20 +13,8 @@ public class ClientActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder()
-                .match(String.class, line -> {
-                    try {
-                        String[] tokens = line.split("\\s+", 2);
-                        BookRequest.Type requestType = BookRequest.Type.valueOf(tokens[0].toUpperCase());
-                        String bookName = tokens[1];
-                        send(bookName, requestType);
-                    } catch (IndexOutOfBoundsException e) {
-                        log.error("not enough arguments");
-                    } catch (IllegalArgumentException e) {
-                        log.error("invalid request type");
-                    }
-                })
                 .match(BookPrice.class, bookPrice -> {
-                    System.out.println(bookPrice.toString());
+                    System.out.println(bookPrice.getPrice());
                 })
                 .match(BookOrder.class, bookOrder -> {
                     System.out.println(bookOrder.toString());
@@ -40,6 +28,18 @@ public class ClientActor extends AbstractActor {
                             System.out.println(text);
                     }
                 })
+                .match(String.class, line -> {
+                    try {
+                        String[] tokens = line.split("\\s+", 2);
+                        BookRequest.Type requestType = BookRequest.Type.valueOf(tokens[0].toUpperCase());
+                        String bookName = tokens[1];
+                        send(bookName, requestType);
+                    } catch (IndexOutOfBoundsException e) {
+                        log.error("not enough arguments");
+                    } catch (IllegalArgumentException e) {
+                        log.error("invalid request type");
+                    }
+                })
                 .match(BookUnavailable.class, bookUnavailable -> {
                     log.warning(bookUnavailable.getMessage());
                 })
@@ -48,7 +48,7 @@ public class ClientActor extends AbstractActor {
     }
 
     private void send(String bookName, BookRequest.Type requestType) {
-        String path = "akka.tcp://remote_system/user/server";
+        String path = "akka.tcp://bookstore_server@127.0.0.1:2552/user/server";
         getContext().actorSelection(path).tell(new BookRequest(bookName, requestType), getSelf());
     }
 

@@ -1,6 +1,8 @@
 package message;
 
-public abstract class BookInfo {
+import scala.Serializable;
+
+public abstract class BookInfo implements Serializable {
 
     private final String name;
 
