@@ -27,27 +27,13 @@ public class Client {
 
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         while (true) {
-//            try {
-                String line = br.readLine();
-                if (line.equals("q")) {
-                    break;
-                }
-                actor.tell(line, null);
-//                Type bookRequest = Type.valueOf(line);
-//            } catch (IllegalArgumentException e) {
-//                error("Invalid request type");
-//            }
-
-//            if (line.equals(Type.PRICE.toString())) {
-//
-//            } else if (line.equals(Type.PRICE.toString())) {
-//
-//            } else if (line.equals(Type.PRICE.toString())) {
-//
-//            }
+            String line = br.readLine();
+            if (line.equals("q")) {
+                break;
+            }
+            actor.tell(line, null);
         }
 
         system.terminate();
-
     }
 }
