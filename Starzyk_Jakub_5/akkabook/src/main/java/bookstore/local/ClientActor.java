@@ -18,14 +18,6 @@ public class ClientActor extends AbstractActor {
                         String[] tokens = line.split("\\s+", 2);
                         BookRequest.Type requestType = BookRequest.Type.valueOf(tokens[0].toUpperCase());
                         String bookName = tokens[1];
-//                        switch (requestType) {
-//                            case PRICE:
-//                                break;
-//                            case ORDER:
-//                                break;
-//                            case TEXT:
-//                                break;
-//                        }
                         send(bookName, requestType);
                     } catch (IndexOutOfBoundsException e) {
                         log.error("not enough arguments");
@@ -56,7 +48,7 @@ public class ClientActor extends AbstractActor {
     }
 
     private void send(String bookName, BookRequest.Type requestType) {
-        String path = "";
+        String path = "akka.tcp://remote_system/user/server";
         getContext().actorSelection(path).tell(new BookRequest(bookName, requestType), getSelf());
     }
 

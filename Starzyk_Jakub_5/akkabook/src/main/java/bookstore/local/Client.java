@@ -19,11 +19,10 @@ public class Client {
                     .collect(Collectors.toSet()));
 
     public static void main(String[] args) throws IOException {
-        final ActorSystem system = ActorSystem.create("local_system");
+        final ActorSystem system = ActorSystem.create("bookstore_local");
         final ActorRef actor = system.actorOf(Props.create(ClientActor.class), "client");
         System.out.println("Bookstore client started.\n" +
-                "Available request types:\n" +
-                requests);
+                "Available request types: " + requests);
 
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         while (true) {

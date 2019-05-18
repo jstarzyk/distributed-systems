@@ -15,7 +15,7 @@ import java.time.Duration;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class TextActor extends AbstractActor {
+public class TextWorker extends AbstractActor {
 
     private final LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
 

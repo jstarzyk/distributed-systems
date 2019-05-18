@@ -6,7 +6,7 @@ import akka.event.LoggingAdapter;
 import message.request.BookRequest;
 import message.response.BookPrice;
 
-public class PriceActor extends AbstractActor {
+public class PriceWorker extends AbstractActor {
 
     private final LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
 
