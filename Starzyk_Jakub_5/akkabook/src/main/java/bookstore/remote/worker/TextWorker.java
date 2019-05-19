@@ -2,6 +2,7 @@ package bookstore.remote.worker;
 
 import akka.NotUsed;
 import akka.actor.AbstractActor;
+import akka.actor.Props;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import akka.stream.ActorMaterializer;
@@ -54,4 +55,5 @@ public class TextWorker extends AbstractActor {
         String message = "streaming '" + name + "' completed (" + textType + "(s))";
         return Sink.actorRef(getSender(), message);
     }
+
 }

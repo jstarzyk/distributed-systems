@@ -34,13 +34,31 @@ public class ClientApp {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         while (true) {
             String line = br.readLine();
+
             if (line.equals("q")) {
                 break;
             }
-            actor.tell(line, null);
-//            akka.remote.Actorr
+
+            BookRequest bookRequest = parseBookRequest(line);
+            if (bookRequest != null) {
+                actor.tell(bookRequest, null);
+            }
         }
 
         system.terminate();
+    }
+
+    private static BookRequest parseBookRequest(String line) {
+        try {
+            String[] tokens = line.split("\\s+", 2);
+            BookRequest.Type requestType = BookRequest.Type.valueOf(tokens[0].toUpperCase());
+            String bookName = tokens[1];
+            return new BookRequest(bookName, requestType);
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println("not enough arguments");
+        } catch (IllegalArgumentException e) {
+            System.out.println("invalid request type");
+        }
+        return null;
     }
 }
