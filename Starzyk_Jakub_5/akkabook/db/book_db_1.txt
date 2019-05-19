@@ -1,0 +1,4 @@
+BookA | 20
+BookB | 15
+BookC | 33
+BookD 4th Edition | 40

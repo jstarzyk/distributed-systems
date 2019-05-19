@@ -1,0 +1,8 @@
+BookK | 20
+BookL | 15
+BookM | 33
+BookN | 40
+BookO | 10
+BookP | 12
+BookQ | 11
+BookR | 90
