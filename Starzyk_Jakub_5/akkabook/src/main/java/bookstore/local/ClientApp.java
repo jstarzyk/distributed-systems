@@ -23,7 +23,6 @@ public class ClientApp {
 
     public static void main(String[] args) throws IOException {
         File configFile = new File("config/client_app.conf");
-//        System.out.println(configFile.getAbsolutePath());
         Config config = ConfigFactory.parseFile(configFile);
 
         final ActorSystem system = ActorSystem.create("bookstore_client", config);

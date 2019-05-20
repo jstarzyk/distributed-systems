@@ -1,8 +1,6 @@
 package message;
 
-import scala.Serializable;
-
-public abstract class BookInfo implements Serializable {
+public abstract class BookInfo implements scala.Serializable {
 
     private final String name;
 
@@ -12,5 +10,12 @@ public abstract class BookInfo implements Serializable {
 
     public String getName() {
         return name;
+    }
+
+    @Override
+    public String toString() {
+        return "BookInfo{" +
+                "name='" + name + '\'' +
+                '}';
     }
 }

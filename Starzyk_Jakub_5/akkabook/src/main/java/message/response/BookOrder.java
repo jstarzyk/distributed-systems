@@ -8,9 +8,8 @@ public class BookOrder extends BookInfo {
         super(name);
     }
 
-//    @Override
-//    public BookInfo parseBookInfo(String[] lineTokens) {
-//        String name = lineTokens[0];
-//        return new BookOrder(name);
-//    }
+    @Override
+    public String toString() {
+        return "BookOrder{} " + super.toString();
+    }
 }

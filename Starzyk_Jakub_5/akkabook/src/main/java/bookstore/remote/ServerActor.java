@@ -1,53 +1,54 @@
 package bookstore.remote;
 
 import akka.actor.AbstractActor;
+import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
-import bookstore.remote.worker.OrderWorker;
-import bookstore.remote.worker.PriceWorker;
-import bookstore.remote.worker.TextWorker;
+import bookstore.remote.worker.db.ListsWorker;
+import bookstore.remote.worker.db.BooksWorker;
 import message.request.BookRequest;
+import message.request.SearchArgumentsRequest;
 
 public class ServerActor extends AbstractActor {
 
     private final LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
 
-    private static final String PRICE_WORKER = "priceWorker";
-    private static final String ORDER_WORKER = "orderWorker";
-    private static final String TEXT_WORKER = "textWorker";
+    private static final String LISTS_WORKER = "listsWorker";
+    private static final String BOOKS_WORKER = "booksWorker";
 
     @Override
     public Receive createReceive() {
         return receiveBuilder()
                 .match(BookRequest.class, bookRequest -> {
-                    String worker = null;
                     switch (bookRequest.getType()) {
                         case PRICE:
-                            worker = PRICE_WORKER;
-                            break;
                         case ORDER:
-                            worker = ORDER_WORKER;
+                            context().child(LISTS_WORKER).get().tell(bookRequest, getSender());
                             break;
                         case TEXT:
-                            worker = TEXT_WORKER;
+                            final ActorRef booksWorker = context().child(BOOKS_WORKER).get();
+                            booksWorker.tell(bookRequest, getSender());
+                            SearchArgumentsRequest searchArguments = new SearchArgumentsRequest(
+                                    SearchArgumentsRequest.SearchType.CONTAINS,
+                                    false);
+                            booksWorker.tell(searchArguments, getSender());
                             break;
                     }
-                    context().child(worker).get().tell(bookRequest, getSender());
+                    System.out.println(bookRequest.toString());
                 })
-                .match(String.class, s -> {
-                    if (s.equals(ServerApp.TEST_PATH)) {
-                        System.out.println(getSelf().path().toString());
-                    }
-                })
+//                .match(String.class, s -> {
+//                    if (s.equals(ServerApp.TEST_PATH)) {
+//                        System.out.println(getSelf().path().toString());
+//                    }
+//                })
                 .matchAny(o -> log.info("received unknown message"))
                 .build();
     }
 
     @Override
     public void preStart() {
-        context().actorOf(Props.create(PriceWorker.class), PRICE_WORKER);
-        context().actorOf(Props.create(OrderWorker.class), ORDER_WORKER);
-        context().actorOf(Props.create(TextWorker.class), TEXT_WORKER);
+        context().actorOf(Props.create(ListsWorker.class), LISTS_WORKER);
+        context().actorOf(Props.create(BooksWorker.class), BOOKS_WORKER);
     }
 }

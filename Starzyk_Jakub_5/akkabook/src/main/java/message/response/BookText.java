@@ -6,7 +6,7 @@ public class BookText extends BookInfo {
 
     public enum Type {
 
-        PARAGRAPH,
+        SENTENCE,
         LINE
 
     }

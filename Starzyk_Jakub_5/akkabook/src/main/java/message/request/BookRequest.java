@@ -22,4 +22,11 @@ public class BookRequest extends BookInfo {
     public Type getType() {
         return type;
     }
+
+    @Override
+    public String toString() {
+        return "BookRequest{" +
+                "type=" + type +
+                "} " + super.toString();
+    }
 }
