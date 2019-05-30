@@ -10,7 +10,7 @@ public class ClientActor extends AbstractActor {
 
     private final LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
 
-    private final static String SERVER_PATH = "akka.tcp://bookstore_server@127.0.0.1:2552/user/server";
+    private final static String SERVER_PATH = "akka.tcp://bookstore_server@127.0.0.1:2550/user/server";
 
 //    private void received() {
 //        System.out.print("RECEIVED: ");

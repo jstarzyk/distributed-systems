@@ -5,6 +5,7 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
+import akka.routing.RoundRobinPool;
 import bookstore.remote.worker.AggregatingActor;
 import bookstore.remote.worker.db.lists.BooksWorker;
 import bookstore.remote.worker.db.lists.OrdersWorker;
