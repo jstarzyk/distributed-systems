@@ -4,19 +4,21 @@ import java.io.*;
 
 import org.apache.zookeeper.*;
 
-public class Executor implements Watcher, Runnable, NodeMonitor.NodeMonitorListener, NodeController.NodeControllerListener {
+public class Executor extends Thread implements Watcher, NodeMonitor.NodeMonitorListener, NodeController.NodeControllerListener {
 
-    private NodeController nc;
-    private NodeMonitor dm;
+    private static NodeApplication na;
+    private static NodeController nc;
+    private NodeMonitor nm;
     private String[] exec;
     private Process child;
 
     private Executor(String connectString, String znode, String[] exec) throws IOException {
         this.exec = exec;
+        this.child = null;
         ZooKeeper zk = new ZooKeeper(connectString, 3000, this);
-        dm = new NodeMonitor(zk, znode, this);
+        na = NodeApplication.getInstance();
+        nm = new NodeMonitor(zk, znode, this);
         nc = new NodeController(zk, znode, this);
-        nc.start();
     }
 
     public static void main(String[] args) {
@@ -31,20 +33,21 @@ public class Executor implements Watcher, Runnable, NodeMonitor.NodeMonitorListe
             String[] exec = new String[args.length - 2];
             System.arraycopy(args, 2, exec, 0, exec.length);
 
-            new Executor(connectString, znode, exec).run();
+            new Executor(connectString, znode, exec).start();
+            nc.start();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public void process(WatchedEvent event) {
-        dm.process(event);
+        nm.process(event);
     }
 
     public void run() {
         try {
             synchronized (this) {
-                while (!dm.dead && !nc.exited) {
+                while (!nm.dead && !nc.exited) {
                     wait();
                 }
             }
@@ -66,27 +69,32 @@ public class Executor implements Watcher, Runnable, NodeMonitor.NodeMonitorListe
 
     public void nodeCreated() {
         try {
-            System.out.println("Starting child");
-            child = Runtime.getRuntime().exec(exec);
+            if (child == null) {
+                System.out.println("STARTING '" + String.join(" ", exec) + "'");
+                child = Runtime.getRuntime().exec(exec);
+            }
+            na.update("0");
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public void nodeDeleted() {
-        if (child != null) {
-            System.out.println("Killing process");
-            child.destroy();
-            try {
-                child.waitFor();
-            } catch (InterruptedException ignored) {
+        try {
+            if (child != null) {
+                if (child.isAlive()) {
+                    System.out.println("KILLING process");
+                    child.destroy();
+                    child.waitFor();
+                }
+                child = null;
             }
+            na.update("");
+        } catch (InterruptedException ignored) {
         }
-        child = null;
     }
 
-    @Override
-    public void nodeChildrenChanged() {
-
+    public void nodeChildrenChanged(Integer i) {
+        na.update(i.toString());
     }
 }

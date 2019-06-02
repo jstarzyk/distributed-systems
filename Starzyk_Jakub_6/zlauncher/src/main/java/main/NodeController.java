@@ -26,7 +26,6 @@ class NodeController extends Thread {
         void quit();
     }
 
-    @Override
     public void run() {
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -49,10 +48,10 @@ class NodeController extends Thread {
 
     private void showTree() {
         try {
-            ZKUtil.visitSubTreeDFS(zk, znode, true, (rc, path, ctx, name) -> System.out.println(path));
-        } catch (KeeperException e) {
+            ZKUtil.visitSubTreeDFS(zk, znode, false, (rc, path, ctx, name) -> System.out.println(path));
+        } catch (KeeperException.NoNodeException e) {
             System.out.println(e.getMessage());
-        } catch (InterruptedException e) {
+        } catch (KeeperException | InterruptedException e) {
             e.printStackTrace();
         }
     }

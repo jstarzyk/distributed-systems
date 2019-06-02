@@ -6,11 +6,14 @@ import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.KeeperException.Code;
 
+import java.util.List;
+
 class NodeMonitor implements Watcher {
 
     private ZooKeeper zk;
     private String znode;
     private NodeMonitorListener listener;
+    private List<String> children;
 
     boolean dead;
 
@@ -18,21 +21,42 @@ class NodeMonitor implements Watcher {
         this.zk = zk;
         this.znode = znode;
         this.listener = listener;
-        watch();
+        setDataWatches();
+        setChildWatches();
+        checkExistingChildren();
     }
 
-    public interface NodeMonitorListener {
+    interface NodeMonitorListener {
         void closing(int rc);
         void nodeCreated();
         void nodeDeleted();
-        void nodeChildrenChanged();
+        void nodeChildrenChanged(Integer i);
     }
 
-    private void watch() {
+    private void setDataWatches() {
         try {
             zk.exists(znode, this);
         } catch (KeeperException | InterruptedException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void setChildWatches() {
+        try {
+            children = zk.getChildren(znode, this);
+        } catch (KeeperException.NoNodeException e) {
+            children = null;
+        } catch (KeeperException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void checkExistingChildren() {
+        if (children != null) {
+            listener.nodeCreated();
+            listener.nodeChildrenChanged(children.size());
+        } else {
+            listener.nodeDeleted();
         }
     }
 
@@ -50,15 +74,16 @@ class NodeMonitor implements Watcher {
                 break;
             case NodeCreated:
                 listener.nodeCreated();
-                watch();
+                setDataWatches();
+                setChildWatches();
                 break;
             case NodeDeleted:
                 listener.nodeDeleted();
-                watch();
+                setDataWatches();
                 break;
             case NodeChildrenChanged:
-                listener.nodeChildrenChanged();
-                watch();
+                setChildWatches();
+                checkExistingChildren();
                 break;
         }
     }
